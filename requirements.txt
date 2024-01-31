@@ -1,0 +1,13 @@
+fastapi==0.96.0
+numpy==1.24.3
+#openai==0.27.7
+openai==1.10.0
+#opensearch-py==2.7.0
+pandas==2.0.1
+python-dotenv==1.0.0
+tiktoken==0.4.0
+tokenizers==0.13.3
+torch==2.0.1
+transformers==4.29.2
+uvicorn[stardard]==0.22.0
+elasticsearch==8.9.0
