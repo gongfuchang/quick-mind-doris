@@ -1,1 +1,52 @@
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='8' height='8' fill='none' stroke='rgb(0 0 0 / 0.1)'><path d='M0 .5H31.5V32'/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.dev/svgjs" width="1200" height="560" preserveAspectRatio="none" viewBox="0 0 1200 560">
+    <g mask="url(&quot;#SvgjsMask1102&quot;)" fill="none">
+        <rect width="1200" height="560" x="0" y="0" fill="rgba(254, 254, 254, 1)"></rect>
+        <path d="M1051 462L885 628" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M829 199L463 565" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M433 92L278 247" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M504 10L269 245" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M554 330L800 84" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M687 548L411 824" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M757 122L940 -61" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M110 460L343 227" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M162 184L355 -9" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M455 284L635 104" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M214 82L-137 433" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M151 64L-112 327" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M153 495L-55 703" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M965 69L698 336" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M67 552L-241 860" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M438 151L716 -127" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M227 48L447 -172" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M1107 15L800 322" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M953 236L752 437" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M64 194L-143 401" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M624 250L893 -19" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M534 94L321 307" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M105 43L-75 223" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M856 213L573 496" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M849 342L439 752" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M657 74L855 -124" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M424 440L7 857" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M1135 194L1540 -211" stroke-width="8" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M344 131L198 277" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M672 47L900 -181" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M804 539L633 710" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1103&quot;)" stroke-linecap="round" class="BottomLeft"></path>
+        <path d="M190 420L-207 817" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M451 245L687 9" stroke-width="6" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+        <path d="M937 446L614 769" stroke-width="10" stroke="url(&quot;#SvgjsLinearGradient1104&quot;)" stroke-linecap="round" class="TopRight"></path>
+    </g>
+    <defs>
+        <mask id="SvgjsMask1102">
+            <rect width="1200" height="560" fill="#ffffff"></rect>
+        </mask>
+        <linearGradient x1="100%" y1="0%" x2="0%" y2="100%" id="SvgjsLinearGradient1103">
+            <stop stop-color="rgba(245, 245, 245, 0)" offset="0"></stop>
+            <stop stop-color="rgba(245, 245, 245, 1)" offset="1"></stop>
+        </linearGradient>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="SvgjsLinearGradient1104">
+            <stop stop-color="rgba(245, 245, 245, 0)" offset="0"></stop>
+            <stop stop-color="rgba(245, 245, 245, 1)" offset="1"></stop>
+        </linearGradient>
+    </defs>
+</svg>

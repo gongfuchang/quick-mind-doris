@@ -16,4 +16,6 @@ export interface Source {
     imageId: string;
   };
   isNavigational: boolean;
+  title: string;
+  content: string;
 }

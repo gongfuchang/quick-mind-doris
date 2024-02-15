@@ -6,7 +6,7 @@ import {
 import { Skeleton } from "@/app/components/skeleton";
 import { Wrapper } from "@/app/components/wrapper";
 import { Source } from "@/app/interfaces/source";
-import { BookOpenText } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { FC } from "react";
 import Markdown from "react-markdown";
 
@@ -18,7 +18,7 @@ export const Answer: FC<{ markdown: string; sources: Source[] }> = ({
     <Wrapper
       title={
         <>
-          <BookOpenText></BookOpenText> Answer
+          <Sparkles />答案
         </>
       }
       content={

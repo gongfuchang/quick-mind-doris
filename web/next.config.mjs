@@ -8,18 +8,19 @@ export default (phase, { defaultConfig }) => {
       output: "export",
       assetPrefix: "/ui/",
       basePath: "/ui",
-      distDir: "../ui"
+      distDir: "../ui",
     };
   } else {
     return {
+      reactStrictMode: false,
       async rewrites() {
         return [
           {
             source: "/query",
-            destination: "http://127.0.0.1:8080/query" // Proxy to Backend
-          }
+            destination: "http://127.0.0.1:8000/query" // Proxy to Backend
+          },
         ];
-      }
+      },
     };
   }
-}
+};

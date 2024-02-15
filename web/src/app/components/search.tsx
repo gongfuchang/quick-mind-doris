@@ -1,6 +1,6 @@
 "use client";
 import { getSearchUrl } from "@/app/utils/get-search-url";
-import { ArrowRight } from "lucide-react";
+import { SearchCheck } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import React, { FC, useState } from "react";
@@ -27,14 +27,14 @@ export const Search: FC = () => {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           autoFocus
-          placeholder="Ask Lepton AI anything ..."
+          placeholder="Ask Quick Mind anything for Doris..."
           className="px-2 pr-6 w-full rounded-md flex-1 outline-none bg-white"
         />
         <button
           type="submit"
-          className="w-auto py-1 px-2 bg-black border-black text-white fill-white active:scale-95 border overflow-hidden relative rounded-xl"
+          className="w-auto py-1 px-2 text-black active:scale-95 border overflow-hidden relative rounded-xl"
         >
-          <ArrowRight size={16} />
+          <SearchCheck size={22} />
         </button>
       </label>
     </form>

@@ -18,18 +18,17 @@ export const parseStreaming = async (
   let uint8Array = new Uint8Array();
   let chunks = "";
   let sourcesEmitted = false;
-  const response = await fetch(`/query`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "*./*",
+  const response = await fetch(
+    `/query?query=${query}&generate_related_questions=1`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "*./*",
+      },
+      signal: controller.signal,
     },
-    signal: controller.signal,
-    body: JSON.stringify({
-      query,
-      search_uuid,
-    }),
-  });
+  );
   if (response.status !== 200) {
     onError?.(response.status);
     return;
@@ -48,6 +47,7 @@ export const parseStreaming = async (
     (chunk) => {
       uint8Array = new Uint8Array([...uint8Array, ...chunk]);
       chunks = decoder.decode(uint8Array, { stream: true });
+      console.log("chunks=>" + chunks);
       if (chunks.includes(LLM_SPLIT)) {
         const [sources, rest] = chunks.split(LLM_SPLIT);
         if (!sourcesEmitted) {

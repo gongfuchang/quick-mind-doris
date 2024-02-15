@@ -15,7 +15,7 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
   const [error, setError] = useState<number | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    void parseStreaming(
+    parseStreaming(
       controller,
       query,
       rid,
@@ -25,7 +25,11 @@ export const Result: FC<{ query: string; rid: string }> = ({ query, rid }) => {
       setError,
     );
     return () => {
-      controller.abort();
+      try {
+        controller.abort();
+      } catch (error) {
+        console.log(error);
+      }
     };
   }, [query]);
   return (

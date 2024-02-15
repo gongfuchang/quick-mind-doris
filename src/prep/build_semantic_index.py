@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 from src.logger import logger
 from src.utils.model_util import get_model_tuple, get_device, average_pool
-from src.prep2.build_vault_dict import get_vault
+from src.prep.build_vault_dict import get_vault
 from src.utils.file_util import get_file_path
 
 EMBEDDINGS_ARRAY_NPY = get_file_path('data/embedding/doc_embeddings_array2.npy')

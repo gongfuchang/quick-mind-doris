@@ -207,10 +207,12 @@ if __name__ == '__main__':
     parser.add_argument('--vault_path', type=str, help='Path to helper doc vault')
     args = parser.parse_args()
 
-    valt_path = 'E:\data\doris\doris-udf8.txt'
+    valt_path = get_file_path('assets/doris-udf8.txt')
 
     vault = create_vault_dict(valt_path)
     logger.info(f'Number of docs in vault: {len(vault):,}')
+
+    os.makedirs(os.path.dirname(DATA_VAULT_DICT_PICKLE), exist_ok=True)
 
     with open(DATA_VAULT_DICT_PICKLE, 'wb+') as f:
         pickle.dump(vault, f, protocol=pickle.HIGHEST_PROTOCOL)

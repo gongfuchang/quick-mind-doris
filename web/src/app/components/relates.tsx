@@ -10,7 +10,7 @@ export const Relates: FC<{ relates: Relate[] | null }> = ({ relates }) => {
     <Wrapper
       title={
         <>
-          <MessageSquareQuote></MessageSquareQuote> Related
+          <MessageSquareQuote></MessageSquareQuote> 相关问题
         </>
       }
       content={

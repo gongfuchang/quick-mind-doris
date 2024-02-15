@@ -1,23 +1,32 @@
 import { Skeleton } from "@/app/components/skeleton";
 import { Wrapper } from "@/app/components/wrapper";
 import { Source } from "@/app/interfaces/source";
-import { BookText } from "lucide-react";
+import { TextQuote } from "lucide-react";
 import { FC } from "react";
 
 const SourceItem: FC<{ source: Source; index: number }> = ({
   source,
   index,
 }) => {
-  const { id, name, url } = source;
-  const domain = new URL(url).hostname;
+  const url = "#"; // TODO make up the url
+  const { title, content } = source;
+  const domain = "doris.apache.org"; // TODO make up the domain
   return (
     <div
       className="relative text-xs py-3 px-3 bg-zinc-100 hover:bg-zinc-200 rounded-lg flex flex-col gap-2"
-      key={id}
+      key={title}
+      title={content}
     >
-      <a href={url} target="_blank" className="absolute inset-0"></a>
+      {/* <a href={url} target="_blank" className="absolute inset-0"></a> */}
       <div className="font-medium text-zinc-950 text-ellipsis overflow-hidden whitespace-nowrap break-words">
-        {name}
+        {title}
+      </div>
+      <div className="flex gap-2 items-center">
+        <div className="flex-1 overflow-hidden">
+          <div className="text-ellipsis whitespace-nowrap break-all text-zinc-400 overflow-hidden w-full">
+            {content}
+          </div>
+        </div>
       </div>
       <div className="flex gap-2 items-center">
         <div className="flex-1 overflow-hidden">
@@ -42,11 +51,11 @@ export const Sources: FC<{ sources: Source[] }> = ({ sources }) => {
     <Wrapper
       title={
         <>
-          <BookText></BookText> Sources
+          <TextQuote /> 资源
         </>
       }
       content={
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-2 gap-2">
           {sources.length > 0 ? (
             sources.map((item, index) => (
               <SourceItem

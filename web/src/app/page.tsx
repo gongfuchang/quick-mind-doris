@@ -12,8 +12,9 @@ export default function Home() {
         <Logo></Logo>
         <Search></Search>
         <div className="flex gap-2 flex-wrap justify-center">
-          <PresetQuery query="Who said live long and prosper?"></PresetQuery>
-          <PresetQuery query="Why do we only see one side of the moon?"></PresetQuery>
+          <PresetQuery query="如何快速开始 Apache Doris？"></PresetQuery>
+          <PresetQuery query="Doris 支持哪些数据源？"></PresetQuery>
+          <PresetQuery query="什么场景下适合使用物化视图？"></PresetQuery>
         </div>
         <Footer></Footer>
       </div>
