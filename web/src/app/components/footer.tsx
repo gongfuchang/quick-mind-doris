@@ -32,7 +32,7 @@ export const Footer: FC = () => {
         </a>
         <a
           className="hover:text-zinc-950"
-          href="https://github.com/gongfuchang/quick_mind_doris"
+          href="https://github.com/gongfuchang/quick-mind-doris"
         >
           Github
         </a>

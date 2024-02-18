@@ -170,3 +170,5 @@ notebooks/
 data/
 data-local/
 plugin/node_modules/
+
+ui/

@@ -24,7 +24,7 @@ from src.logger import logger
 import re
 import base64
 from src.utils.file_util import get_file_path
-DATA_VAULT_DICT_PICKLE = get_file_path('data/vault_dict2.pickle')
+DATA_VAULT_DICT_PICKLE = get_file_path('data/vault_dict.pickle')
 
 def folder_chunks(content: str, max_chunk_lines=5, max_token_num=300) -> List[str]:
     """Folder up the text into chunks, where each new paragraph / top-level bullet in a new chunk.

@@ -3,6 +3,7 @@ Simple FastAPI app that queries opensearch and a semantic index for retrieval-au
 """
 import concurrent.futures
 import json
+import os
 import re
 import threading
 import traceback
@@ -43,7 +44,7 @@ logger.info(f'Semantic index loaded with {len(embedding_index)} documents')
 # If the user did not provide a query, we will use this default query.
 _default_query = "如何快速开启 Apache Doris 之旅?"
 
-is_test = True
+is_test = False
 _rag_query_text = """
 You are a large language AI assistant built by QuickMind AI. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.
 
@@ -74,20 +75,20 @@ stop_words = [
 
 
 _more_questions_prompt = """
-You are a helpful assistant that helps the user to ask Apache Doris related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups, and write questions no longer than 20 words each. Please make sure that specifics, like events, names, locations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "the Manhattan project", in the follow up question, do not just say "the project", but use the full name "the Manhattan project". Your related questions must be in the same language as the original question.
+You are a helpful assistant that helps the user to ask Apache Doris related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups. Please make sure that specifics, like attributes, usage, operations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "如何删除 BACKEND 节点？", in the follow up question, do not just say "这个节点", but use the full name "BACKEND  节点". Your related questions must be in the same language as the original question.
 
 Here are the contexts of the question:
 
 {context}
 
-If the generated question is not related with Apache Doris, just ignore it.
-
+If the generated question is not related with Apache Doris, just ignore it and give empty answer.
+Each question should not be longer than 20 words and should not contain carriage return, line feed or tab characters.
 Remember, based on the original question and related contexts, suggest three such further questions. Do NOT repeat the original question. Each related question should be no longer than 20 words. Here is the original question:
 """
 
 if is_test:
     _rag_query_text = "Just say: 'I am a test.'"
-    _more_questions_prompt = "Just say: 'I am a test for related question.'"
+    _more_questions_prompt = "Just say twice following in two lines: 'I am a test for related question.'"
 class QueryModel(BaseModel):
     query: str
     generate_related_questions: Optional[bool] = True
@@ -155,7 +156,7 @@ class RAG(uvicorn.Server):
         "secret": {
             # TODO support search engin api key
             "SERPER_SEARCH_API_KEY": "",
-            "OPENAI_API_KEY": "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",
+            "OPENAI_API_KEY": "",
         },
     }
 
@@ -177,7 +178,7 @@ class RAG(uvicorn.Server):
             from openai import OpenAI
             thread_local.client = OpenAI(
                 # This is the default and can be omitted
-                api_key="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",
+                api_key = os.getenv("OPENAI_API_KEY") or dt["secret"]["OPENAI_API_KEY"],
             )
             return thread_local.client
 
@@ -220,8 +221,8 @@ class RAG(uvicorn.Server):
             )
             related = response.choices[0].message.content
             logger.info(f"Related questions: {related}")
-            return [{'question': related}]
-            # return [{'question': q} for q in related.split('\n')[0]]
+            # return [{'question': related}]
+            return [{'question': q} for q in related.split('\n')]
             # related = response.choices[0].message.tool_calls[0].function.arguments
             # if isinstance(related, str):
             #     related = json.loads(related)
@@ -282,7 +283,7 @@ class RAG(uvicorn.Server):
         ):
             all_yielded_results.append(result)
             yield result
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.1)
 
     def query_function(
             self,
@@ -351,7 +352,7 @@ class RAG(uvicorn.Server):
             self.streamify(
                 contexts, llm_response, related_questions_future
             ),
-            media_type="text/html",
+            media_type="text/event-stream",
         )
 
     def _get_chunks(self, query: str):

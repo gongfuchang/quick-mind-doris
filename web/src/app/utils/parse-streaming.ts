@@ -19,7 +19,7 @@ export const parseStreaming = async (
   let chunks = "";
   let sourcesEmitted = false;
   const response = await fetch(
-    `/query?query=${query}&generate_related_questions=1`,
+    `/api/query-server?query=${query}&generate_related_questions=1`,
     {
       method: "GET",
       headers: {

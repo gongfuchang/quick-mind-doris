@@ -15,9 +15,9 @@ from src.utils.model_util import get_model_tuple, get_device, average_pool
 from src.prep.build_vault_dict import get_vault
 from src.utils.file_util import get_file_path
 
-EMBEDDINGS_ARRAY_NPY = get_file_path('data/embedding/doc_embeddings_array2.npy')
+EMBEDDINGS_ARRAY_NPY = get_file_path('data/embedding/doc_embeddings_array.npy')
 
-EMBEDDING_INDEX_PICKLE = get_file_path('data/embedding/embedding_index2.pickle')
+EMBEDDING_INDEX_PICKLE = get_file_path('data/embedding/embedding_index.pickle')
 
 
 def get_batch_embeddings(document_batch: List[str], tokenizer, model) -> List[np.ndarray]:
