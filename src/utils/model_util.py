@@ -3,6 +3,11 @@ import torch.nn.functional as F
 from torch import Tensor
 from transformers import AutoModel, AutoTokenizer
 import os
+import threading
+
+from openai import OpenAI
+from zhipuai import ZhipuAI
+
 from src.logger import logger
 
 # EMBEDDING_MODEL_NAME = 'intfloat/e5-small-v2'
@@ -36,5 +41,68 @@ def get_model_tuple() -> tuple[AutoTokenizer, AutoModel]:
 
 if __name__ == '__main__':
     pass
+from abc import ABC, abstractmethod
 
 
+class Client(ABC):
+    @abstractmethod
+    def __init__(self, config: dict):
+        pass
+
+    @abstractmethod
+    def create_completion(self, messages: [str], temperature: float = 0.5, max_tokens: int = 512, stream: bool = False,
+                          tools: [str] = None, stop_words: [str] = None):
+        pass
+
+
+class OpenaiClient(Client):
+    def __init__(self, config: dict):
+        self.config = config
+        # Initialize your OpenAI client here with the config
+        self.openai = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+
+    def create_completion(self, messages: [str], temperature: float = 0.5, max_tokens: int = 512, stream: bool = False,
+                          tools: [str] = None, stop_words: [str] = None):
+        # Implement the method to create a completion with OpenAI
+        return self.openai.chat.completions.create(model=self.config.get("model"), messages=messages,
+                                                   temperature=temperature, max_tokens=max_tokens, stream=stream,
+                                                   tools=tools, stop=stop_words)
+
+
+class GlmClient(Client):
+    def __init__(self, config: dict):
+        self.config = config
+        # Initialize your GLM client here with the config
+        self.glm = ZhipuAI(api_key=os.getenv('ZHIPU_API_KEY'))
+
+    def create_completion(self, messages: [str], temperature: float = 0.5, max_tokens: int = 512, stream: bool = False,
+                          tools: [str] = None, stop_words: [str] = None):
+        # Implement the method to create a completion with GLM
+        return self.glm.chat.completions.create(model="glm-4", messages=messages,
+                                                temperature=temperature, max_tokens=max_tokens, stream=stream,
+                                                tools=tools, stop=stop_words)
+
+
+class ClientFactory:
+    def get_client(self, type: str, config: dict = None) -> Client:
+        if type == 'GPT':
+            return OpenaiClient(config)
+        elif type == 'GLM':
+            return GlmClient(config)
+        else:
+            raise ValueError(f"Unsupported client type: {type}")
+
+
+factory = ClientFactory()
+
+
+def get_client(llm_type: str, config: dict = None) -> Client:
+    thread_local = threading.local()
+    # Check if the client already exists in the current thread
+    if hasattr(thread_local, 'client'):
+        return thread_local.client
+
+    # If not, create a new client and store it in the thread-local variable
+    thread_local.client = factory.get_client(llm_type, config)
+
+    return thread_local.client

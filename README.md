@@ -1,9 +1,24 @@
 # quick-mind-doris
 <img src="assets/snapshot.png" alt="icon"/>
 
+## 准备工作
+- build vault dictionary：根据文档（assets/doris-udf8.txt）创建实体对象文件（data/vault_dict.pickle）
+```shell
+python build_vault_dict.py
+```
+- build index：根据实体对象文件（data/vault_dict.pickle）创建索引文件
+```shell
+python build_index.py
+```
+- build opensearch index：根据文档（data/vault_dict.pickle）创建 opensearch 索引
+```shell
+python build_opensearch_index.py
+```
+
 ## 启动 server
 - 填写 OpenAI API Key 后启动：
 ```shell
+export LLM_TYPE=GLM or GPT
 export OPENAI_API_KEY=sk-xxxxxx
 python app.py
 ```

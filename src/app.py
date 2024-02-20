@@ -3,9 +3,7 @@ Simple FastAPI app that queries opensearch and a semantic index for retrieval-au
 """
 import concurrent.futures
 import json
-import os
 import re
-import threading
 import traceback
 from typing import Annotated, List, Generator, Optional
 from typing import Dict
@@ -15,7 +13,7 @@ import tiktoken
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import Response, HTMLResponse, StreamingResponse
 from pydantic import BaseModel
 
 from src.logger import logger
@@ -23,9 +21,9 @@ from src.logger import logger
 #                                              query_opensearch)
 from src.prep.build_semantic_index import query_semantic, get_embeddings_index, get_embeddings_array
 from src.prep.build_vault_dict import get_vault
-from src.utils.model_util import get_model_tuple
+from src.utils.model_util import get_model_tuple, get_client
 from src.utils.type_util import to_bool
-
+from src.utils.prompt_util import get_more_questions_prompt, get_query_prompt
 os_client = None
 # Create opensearch client
 # try:
@@ -44,51 +42,7 @@ logger.info(f'Semantic index loaded with {len(embedding_index)} documents')
 # If the user did not provide a query, we will use this default query.
 _default_query = "如何快速开启 Apache Doris 之旅?"
 
-is_test = False
-_rag_query_text = """
-You are a large language AI assistant built by QuickMind AI. You are given a user question, and please write clean, concise and accurate answer to the question. You will be given a set of related contexts to the question, each starting with a reference number like [[citation:x]], where x is a number. Please use the context and cite the context at the end of each sentence if applicable.
 
-Your answer must be correct, accurate and written by an expert using an unbiased and professional tone. Please limit to 1024 tokens. Do not give any information that is not related to the question, and do not repeat. Say "information is missing on" followed by the related topic, if the given context do not provide sufficient information.
-
-Please cite the contexts with the reference numbers, in the format [citation:x]. If a sentence comes from multiple contexts, please list all applicable citations, like [citation:3][citation:5]. Other than code and specific names and citations, your answer must be written in the same language as the question.
-
-Use chinese if the question contains chinese characters otherwise use english instead.
-
-Here are the set of contexts:
-
-{context}
-
-Remember, don't blindly repeat the contexts verbatim. And here is the user question:
-"""
-
-# A set of stop words to use - this is not a complete set, and you may want to
-# add more given your observation.
-stop_words = [
-    "<|im_end|>",
-    "[End]",
-    "[end]",
-    "\nReferences:\n",
-    "\nSources:\n",
-    "End.",
-]
-
-
-
-_more_questions_prompt = """
-You are a helpful assistant that helps the user to ask Apache Doris related questions, based on user's original question and the related contexts. Please identify worthwhile topics that can be follow-ups. Please make sure that specifics, like attributes, usage, operations, are included in follow up questions so they can be asked standalone. For example, if the original question asks about "如何删除 BACKEND 节点？", in the follow up question, do not just say "这个节点", but use the full name "BACKEND  节点". Your related questions must be in the same language as the original question.
-
-Here are the contexts of the question:
-
-{context}
-
-If the generated question is not related with Apache Doris, just ignore it and give empty answer.
-Each question should not be longer than 20 words and should not contain carriage return, line feed or tab characters.
-Remember, based on the original question and related contexts, suggest three such further questions. Do NOT repeat the original question. Each related question should be no longer than 20 words. Here is the original question:
-"""
-
-if is_test:
-    _rag_query_text = "Just say: 'I am a test.'"
-    _more_questions_prompt = "Just say twice following in two lines: 'I am a test for related question.'"
 class QueryModel(BaseModel):
     query: str
     generate_related_questions: Optional[bool] = True
@@ -103,23 +57,26 @@ class RAG(uvicorn.Server):
     are then stored in a KV so that it can be retrieved later (TODO).
     """
 
-    def __init__(self, config):
+    def __init__(self, config, llm_type: str):
         super().__init__(config)
+
+        self.llm_type = llm_type
+
         # Load vault dictionary
-        # self.vault = None
         self.vault = get_vault()
         logger.info(f'Vault loaded with {len(self.vault)} documents')
 
-        self.model = self.deployment_template["env"]["LLM_MODEL"]
         # An executor to carry out async tasks, such as uploading to KV.
         self.executor = concurrent.futures.ThreadPoolExecutor(
             max_workers=self.handler_max_concurrency * 2
         )
         # whether we should generate related questions.
-        self.should_do_related_questions = to_bool(self.deployment_template["env"]["RELATED_QUESTIONS"])
+        self.should_do_related_questions = to_bool(self.deployment_template["config"]["related_question"])
 
         self.app = FastAPI()
         self.app.get("/query")(self.query_function)
+        self.app.get("/answer")(self.answer_function)
+
         # List of allowed origins. You can also allow all by using ["*"]
         origins = [
             "http://localhost",  # or whatever hosts you want to allow
@@ -137,50 +94,27 @@ class RAG(uvicorn.Server):
         await super().run(sockets=sockets)
 
     def launch(self):
-        uvicorn.run(self.app)
+        uvicorn.run(app=self.app, port=self.config.port, host=self.config.host)
 
+    # TODO using rdb to store
     deployment_template = {
-        "env": {
-            "SEARCH_ENGIN": "",  # TODO support search engin
-            "LLM_MODEL": "gpt-3.5-turbo",
+        "llm_type": "GLM",  # default to GPT
+        "config": {
+            "search_engin": "",  # TODO support search engin
+            "model": "gpt-3.5-turbo",
             # For all the search queries and results, we will use the KV store to
             # store them so that we can retrieve them later. Specify the name of the
             # KV here.
-            "KV_NAME": "",  # TODO support kv restore
+            "kv_name": "",  # TODO support kv restore
             # If set to true, will generate related questions. Otherwise, will not.
-            "RELATED_QUESTIONS": "true",
-            "BASE_URL": "https://api.openai-proxy.com"
-        },
-        # Secrets you need to have: search api subscription key, and lepton
-        # workspace token to query lepton's llama models.
-        "secret": {
-            # TODO support search engin api key
-            "SERPER_SEARCH_API_KEY": "",
-            "OPENAI_API_KEY": "",
-        },
+            "related_question": "true",
+            "base_url": "https://api.openai-proxy.com"
+        }
     }
 
     # It's just a bunch of api calls, so our own deployment can be made massively
     # concurrent.
     handler_max_concurrency = 16
-
-    def local_client(self):
-        """
-        Gets a thread-local client, so in case openai clients are not thread safe,
-        each thread will have its own client.
-        """
-
-        thread_local = threading.local()
-        try:
-            return thread_local.client
-        except AttributeError:
-            dt = self.deployment_template
-            from openai import OpenAI
-            thread_local.client = OpenAI(
-                # This is the default and can be omitted
-                api_key = os.getenv("OPENAI_API_KEY") or dt["secret"]["OPENAI_API_KEY"],
-            )
-            return thread_local.client
 
     def get_related_questions(self, query, contexts):
         """
@@ -199,12 +133,12 @@ class RAG(uvicorn.Server):
             pass
 
         try:
-            response = self.local_client().chat.completions.create(
-                model=self.model,
+            dt = self.deployment_template
+            response = get_client(self.llm_type or dt["llm_type"], dt["config"]).create_completion(
                 messages=[
                     {
                         "role": "system",
-                        "content": _more_questions_prompt.format(
+                        "content": get_more_questions_prompt().format(
                             context="\n\n".join([c["content"] for c in contexts])
                         ),
                     },
@@ -213,11 +147,11 @@ class RAG(uvicorn.Server):
                         "content": query,
                     },
                 ],
+                max_tokens = 512
                 # tools=[{
                 #     "type": "function",
                 #     "function": get_tools_spec(ask_related_questions),
-                # }],
-                max_tokens=512,
+                # }]
             )
             related = response.choices[0].message.content
             logger.info(f"Related questions: {related}")
@@ -283,13 +217,18 @@ class RAG(uvicorn.Server):
         ):
             all_yielded_results.append(result)
             yield result
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.05)
+
+    def answer_function(self, query: str) -> HTMLResponse:
+        return self.query_function(query, 'False', 'False', 'False')
 
     def query_function(
             self,
             query: str,
-            generate_related_questions
-    ) -> StreamingResponse:
+            generate_related_questions: str = 'True',
+            stream: str = 'True',
+            with_cite: str = 'True',
+    ) -> Response:
         """
         Query the search engine and returns the response.
 
@@ -303,37 +242,28 @@ class RAG(uvicorn.Server):
         # First, do a search query.
         query = query or _default_query
         generate_related_questions = to_bool(generate_related_questions)
+        stream = to_bool(stream)
+        with_cite = to_bool(with_cite)
         # Basic attack protection: remove "[INST]" or "[/INST]" from the query
         query = re.sub(r"\[/?INST\]", "", query)
         contexts = self._get_chunks(query)
 
-        system_prompt = _rag_query_text.format(
+        system_prompt = get_query_prompt(with_cite).format(
             context="\n\n".join(
                 [f"[[citation:{i + 1}]] {c['content']}" for i, c in enumerate(contexts)]
             )
         )
         try:
-            client = self.local_client()
-            #
-            # llm_response = client.chat.completions.create(
-            #     messages=[
-            #         {
-            #             "role": "user",
-            #             "content": "Say this is a test",
-            #         }
-            #     ],
-            #     model="gpt-3.5-turbo",
-            # )
-            llm_response = client.chat.completions.create(
-                model=self.model,
+            dt = self.deployment_template
+            client = get_client(self.llm_type or dt["llm_type"], dt["config"])
+            llm_response = client.create_completion(
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": query},
                 ],
                 max_tokens=1024,
-                # stop=stop_words, # TODO support stop words
-                stream=True,
                 temperature=0.65,
+                stream=stream,
             )
 
             if self.should_do_related_questions and generate_related_questions:
@@ -348,6 +278,14 @@ class RAG(uvicorn.Server):
             logger.error(f"encountered error: {e}\n{traceback.format_exc()}")
             return HTMLResponse("Internal server error.", 503)
 
+        if not stream:
+            # If we are not streaming, we will just return the response as a JSON.
+            # return HTMLResponse(llm_response.choices[0].message.content, 200)
+            return {
+                "question": query,
+                "contexts": [ctx["content"] for ctx in contexts],
+                "answer": llm_response.choices[0].message.content,
+            }
         return StreamingResponse(
             self.streamify(
                 contexts, llm_response, related_questions_future
@@ -466,8 +404,14 @@ class RAG(uvicorn.Server):
             chunks.append(chunk)
         return chunks
 
+import argparse
 
 if __name__ == '__main__':
-    config = uvicorn.Config(app='main:app', host="0.0.0.0", port=8000)
-    rag = RAG(config)
+    parser = argparse.ArgumentParser(description="Process some integers.")
+    parser.add_argument('--port', type=int, default=8000, help='Port number')
+    parser.add_argument('--llm_type', type=str, default='GPT', help='LLM type, GPT or GLM')
+    args = parser.parse_args()
+
+    config = uvicorn.Config(app='main:app', host="0.0.0.0", port=args.port)
+    rag = RAG(config, llm_type=args.llm_type)
     rag.launch()
