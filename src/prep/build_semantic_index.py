@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 from src.logger import logger
 from src.utils.model_util import get_model_tuple, get_device, average_pool
-from src.prep.build_vault_dict import get_vault
+from src.prep.build_vault_dict import get_vault_dict
 from src.utils.file_util import get_file_path
 
 EMBEDDINGS_ARRAY_NPY = get_file_path('data/embedding/doc_embeddings_array.npy')
@@ -162,7 +162,7 @@ def get_embeddings_index():
 
 if __name__ == '__main__':
     # Load docs
-    vault = get_vault()
+    vault = get_vault_dict()
     logger.info(f'Vault length: {len(vault):,}')
 
     # Load tokenizer and model

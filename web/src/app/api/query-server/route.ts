@@ -5,8 +5,10 @@ async function createStream(req: NextRequest) {
   const decoder = new TextDecoder();
 
   const query = req.nextUrl.searchParams.get("query");
+  const llmType = req.nextUrl.searchParams.get("llm_type");
+  const prefix = (llmType == "gpt" ? process.env.SEARCH_GPT_SERVER_URL : process.env.SEARCH_SERVER_URL);
 
-  const query_url = process.env.SEARCH_SERVER_URL ?? "http://127.0.0.1:8000";
+  const query_url = prefix ?? "http://127.0.0.1:8000";
   const res = await fetch(
     `${query_url}/query?query=${query}&generate_related_questions=1`,
   );

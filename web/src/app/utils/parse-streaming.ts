@@ -9,6 +9,7 @@ export const parseStreaming = async (
   controller: AbortController,
   query: string,
   search_uuid: string,
+  llm_type: string,
   onSources: (value: Source[]) => void,
   onMarkdown: (value: string) => void,
   onRelates: (value: Relate[]) => void,
@@ -19,7 +20,7 @@ export const parseStreaming = async (
   let chunks = "";
   let sourcesEmitted = false;
   const response = await fetch(
-    `/api/query-server?query=${query}&generate_related_questions=1`,
+    `/api/query-server?query=${query}&generate_related_questions=1&llm_type=${llm_type}`,
     {
       method: "GET",
       headers: {

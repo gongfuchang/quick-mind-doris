@@ -18,12 +18,27 @@ export const Title = ({ query }: { query: string }) => {
       <div className="flex-none">
         <button
           onClick={() => {
-            router.push(getSearchUrl(encodeURIComponent(query), nanoid()));
+            router.push(
+              getSearchUrl(encodeURIComponent(query), nanoid(), "glm"),
+            );
           }}
           type="button"
           className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-blue-500 hover:bg-zinc-100"
         >
           <RefreshCcw size={12}></RefreshCcw>重新回答
+        </button>
+      </div>
+      <div className="flex-none">
+        <button
+          onClick={() => {
+            router.push(
+              getSearchUrl(encodeURIComponent(query), nanoid(), "gpt"),
+            );
+          }}
+          type="button"
+          className="rounded flex gap-2 items-center bg-transparent px-2 py-1 text-xs font-semibold text-blue-500 hover:bg-zinc-100"
+        >
+          <RefreshCcw size={12}></RefreshCcw>GPT4回答
         </button>
       </div>
       <div className="flex-none">

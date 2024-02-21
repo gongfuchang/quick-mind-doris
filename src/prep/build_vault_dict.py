@@ -2,11 +2,12 @@
 Reads markdown files and returns a vault dictionary in the format below.
 
 # Note: chunk_id is either <title-id> or <title>. The former is a chunk while the latter is the entire doc.
-dock_id: {
+doc_id: {
     title: doc title,
     title_display:
     language: zh-CN or en,
     version: none if no version provided, otherwise the version number,
+    deprecated: none if not deprecated, otherwise the deprecated version number,
     content: doc content, the full text of the doc
 }
 
@@ -25,6 +26,7 @@ import re
 import base64
 from src.utils.file_util import get_file_path
 DATA_VAULT_DICT_PICKLE = get_file_path('data/vault_dict.pickle')
+DATA_DOC_DICT_PICKLE = get_file_path('data/doc_dict.pickle')
 
 def folder_chunks(content: str, max_chunk_lines=5, max_token_num=300) -> List[str]:
     """Folder up the text into chunks, where each new paragraph / top-level bullet in a new chunk.
@@ -196,10 +198,14 @@ def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
                 'title': doc['title'],
                 'chunks': chunks
             }
-    return vault
+    return vault, doc_dict
 
-def get_vault():
+def get_vault_dict():
     with open(DATA_VAULT_DICT_PICKLE, 'rb') as f:
+        return pickle.load(f)
+
+def get_doc_dict():
+    with open(DATA_DOC_DICT_PICKLE, 'rb') as f:
         return pickle.load(f)
 
 if __name__ == '__main__':
@@ -209,12 +215,15 @@ if __name__ == '__main__':
 
     valt_path = get_file_path('assets/doris-udf8.txt')
 
-    vault = create_vault_dict(valt_path)
-    logger.info(f'Number of docs in vault: {len(vault):,}')
+    vault_dict, doc_dict = create_vault_dict(valt_path)
+    logger.info(f'Number of docs in vault: {len(vault_dict):,}')
 
     os.makedirs(os.path.dirname(DATA_VAULT_DICT_PICKLE), exist_ok=True)
-
     with open(DATA_VAULT_DICT_PICKLE, 'wb+') as f:
-        pickle.dump(vault, f, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(vault_dict, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    os.makedirs(os.path.dirname(DATA_DOC_DICT_PICKLE), exist_ok=True)
+    with open(DATA_DOC_DICT_PICKLE, 'wb+') as f:
+        pickle.dump(doc_dict, f, protocol=pickle.HIGHEST_PROTOCOL)
 
 

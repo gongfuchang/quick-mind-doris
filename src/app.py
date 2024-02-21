@@ -20,7 +20,7 @@ from src.logger import logger
 # from src.prep.build_opensearch_index import (INDEX_NAME, get_opensearch,
 #                                              query_opensearch)
 from src.prep.build_semantic_index import query_semantic, get_embeddings_index, get_embeddings_array
-from src.prep.build_vault_dict import get_vault
+from src.prep.build_vault_dict import get_vault_dict
 from src.utils.model_util import get_model_tuple, get_client
 from src.utils.type_util import to_bool
 from src.utils.prompt_util import get_more_questions_prompt, get_query_prompt
@@ -63,7 +63,7 @@ class RAG(uvicorn.Server):
         self.llm_type = llm_type
 
         # Load vault dictionary
-        self.vault = get_vault()
+        self.vault = get_vault_dict()
         logger.info(f'Vault loaded with {len(self.vault)} documents')
 
         # An executor to carry out async tasks, such as uploading to KV.

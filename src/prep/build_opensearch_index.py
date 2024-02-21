@@ -5,9 +5,9 @@ import pickle
 
 from opensearchpy import OpenSearch, RequestsHttpConnection
 from opensearchpy.helpers import bulk
-
+from build_vault_dict import get_doc_dict
 from src.logger import logger
-
+from datetime import datetime
 INDEX_NAME = 'doris-vault'
 
 
@@ -37,8 +37,15 @@ def get_opensearch(host: str = 'localhost') -> OpenSearch:
 
 
 def create_index(client: OpenSearch, index_name: str) -> None:
-    """Create opensearch index with custom analyzer
-
+    """Create opensearch index with custom analyzer. The document structure is as follows:
+doc_id: {
+    title: doc title,
+    title_display:
+    language: zh-CN or en,
+    version: none if no version provided, otherwise the version number,
+    deprecated: none if not deprecated, otherwise the deprecated version number,
+    content: doc content, the full text of the doc
+}
     Args:
         client: Opensearch client
         index_name: Name of opensearch index
@@ -54,22 +61,22 @@ def create_index(client: OpenSearch, index_name: str) -> None:
             },
             'index': {
                 'query': {
-                    'default_field': 'chunk'
+                    'default_field': 'content'
                 }
             }
         },
         'mappings': {
             'properties': {
-                'title': {'type': 'text', 'analyzer': 'ik_max_word'},
                 'type': {'type': 'keyword'},
-                'path': {'type': 'keyword'},
-                'chunk_header': {'type': 'text', 'analyzer': 'ik_max_word'},
-                'chunk': {'type': 'text', 'analyzer': 'ik_max_word'},
-                'author': {'type': 'keyword'},
+                'title': {'type': 'text', 'analyzer': 'ik_max_word'},
+                'title_display': {'type': 'text', 'analyzer': 'ik_max_word'},
+                'content': {'type': 'text', 'analyzer': 'ik_max_word'},
+                'language': {'type': 'keyword'},
+                'version_from': {'type': 'text'},
+                'deprecated_from': {'type': 'text'},
                 'website': {'type': 'keyword'},
                 'create_time': {'type': 'date'},
                 'update_time': {'type': 'date'},
-                'copyright_type': {'type': 'integer'},
             }
         }
     }
@@ -80,7 +87,15 @@ def create_index(client: OpenSearch, index_name: str) -> None:
 
 
 def index_vault(vault: dict[str, dict], client: OpenSearch, index_name: str) -> None:
-    """Index vault into opensearch index
+    """Index vault into opensearch index.The document structure is as follows:
+doc_id: {
+    title: doc title,
+    title_display:
+    language: zh-CN or en,
+    version: none if no version provided, otherwise the version number,
+    deprecated: none if not deprecated, otherwise the deprecated version number,
+    content: doc content, the full text of the doc
+}
 
     Args:
         vault: Doris helper doc vault dictionary
@@ -91,33 +106,39 @@ def index_vault(vault: dict[str, dict], client: OpenSearch, index_name: str) -> 
     chunks_indexed = 0
     docs = []
 
-    for chunk_id, doc in vault.items():
-        path = doc['path']
+    for doc_id, doc in vault.items():
         title = doc['title']
-        doc_type = doc['type']
-        chunk = doc['chunk']
-        chunk_header = doc['chunk_header']
+        doc_type = 'chunk'  # support various types of documents
+        title_display = doc['title_display']
+        content = doc['content']
+        language = doc['language']
+        version_from = doc['version']
+        deprecated_from = doc['deprecated']
         docs_indexed += 1
         if docs_indexed % 100 == 0:
-            logger.info(f'Indexing {chunk_id} - Path: {path} ({docs_indexed:,} docs)')
+            logger.info(f'Indexing {docs_indexed:,} documents')
+        docs.append(
+            {'_index': index_name, '_id': doc_id, 'title': title, 'title_display': title_display, 'type': doc_type,
+             'content': content, 'version_from': version_from, 'deprecated_from': deprecated_from, 'language': language, 'create_time': datetime.now(), 'update_time': 0})
 
-        docs.append({'_index': index_name, '_id': chunk_id, 'title': title, 'type': doc_type,
-                     'path': path, 'chunk_header': chunk_header, 'chunk': chunk,
-                     'author': '', 'website': '', 'create_time': 0, 'update_time': 0,
-                     'copyright_type': 1})  # TODO
         chunks_indexed += 1
 
-        if chunks_indexed % 2000 == 0:
-            bulk(client, docs)
-            docs = []
+        if chunks_indexed % 200 == 0:
+            try:
+                bulk(client, docs)
+                logger.info(f"Indexed chunk bulk from: {chunks_indexed}")
+            except Exception as e:
+                logger.error(f'Error in indexing({chunks_indexed}): {e}')
+            finally:
+                docs = []
 
     if chunks_indexed % 200 > 0:
         bulk(client, docs)
 
-    logger.info(f'Indexed {chunks_indexed:,} chunks (including full documents)')
+    logger.info(f'Totally Indexed {chunks_indexed:,} documents')
 
 
-def query_opensearch(query: str, client: OpenSearch, index_name: str, type: str = 'chunk', n_results: int = 3) -> dict:
+def query_opensearch(query: str, client: OpenSearch, index_name: str, version_from: str, n_results: int = 3) -> dict:
     """Custom query for opensearch index.
 
     Args:
@@ -145,7 +166,7 @@ def query_opensearch(query: str, client: OpenSearch, index_name: str, type: str 
                     },
                     {
                         'match': {
-                            'chunk_header': {
+                            'title_display': {
                                 'query': query,
                                 'boost': 2.0  # Give matches in the 'chunk_header' field a higher score
                             }
@@ -153,36 +174,22 @@ def query_opensearch(query: str, client: OpenSearch, index_name: str, type: str 
                     },
                     {
                         'match': {
-                            'chunk': {
+                            'content': {
                                 'query': query
                             }
                         }
                     },
-                    {
-                        'match': {
-                            'author': {
-                                'query': query
-                            }
-                        }
-                    },
-                    # {
-                    #     'match': {
-                    #         'author': {
-                    #             'website': query
-                    #         }
-                    #     }
-                    # }
                 ],
-                'filter': [
-                    {
-                        'term': {
-                            'type': 'chunk'
-                        }
-                    }
-                ]
+                # 'filter': [ TODO filter by version comparison
+                #     {
+                #         'term': {
+                #             'version_from': version_from
+                #         }
+                #     }
+                # ]
             }
         }
-    }  # type: ignore
+    }
 
     response = client.search(index=index_name, body=query)
 
@@ -191,24 +198,24 @@ def query_opensearch(query: str, client: OpenSearch, index_name: str, type: str 
 
 if __name__ == '__main__':
     # Load vault dictionary
-    vault = pickle.load(open('data/vault_dict.pickle', 'rb'))
-    logger.info(f'Vault length: {len(vault):,}')
+    doc_dict = get_doc_dict()
+    logger.info(f'Doc length: {len(doc_dict):,}')
 
     # Create client
-    client = get_opensearch()
+    client = get_opensearch("150.158.133.10")
     logger.info(f'Client: {client.info()}')
 
     # Create index
     create_index(client, INDEX_NAME)
 
     # Index vault
-    index_vault(vault, client, INDEX_NAME)
+    index_vault(doc_dict, client, INDEX_NAME)
 
     # Count the number of documents in the index
     logger.info(f'Client cat count: {client.cat.count(index=INDEX_NAME, params={"format": "json"})}')
 
     # Test query
-    test_query = '居文君冠军, 侯逸凡亚军'
-    response = query_opensearch(test_query, client, INDEX_NAME, type='doc', n_results=3)
+    test_query = '扩容节点'
+    response = query_opensearch(test_query, client, INDEX_NAME, version_from='1.2', n_results=3)
     logger.info(f'Test query: {test_query}')
     logger.info(f'Response: {response}')
