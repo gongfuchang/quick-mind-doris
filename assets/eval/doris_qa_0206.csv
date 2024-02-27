@@ -1,0 +1,400 @@
+﻿dlg_id,question,answer
+abb3a4e5-c174-11ee-9cff-b026288862a5,"想请教一下大佬们，如果我想新增一列时间列，这张表里任一字段的数据更新，这个时间列都会自动更新时间，Doris支持这种操作么？还是说，得在数据导入前给每列数据加一个最新时间数据再进行导入Doris,",2.1版本支持
+b7c09039-c195-11ee-ad2f-b026288862a5,"如何在Apache Doris中实现节点缩容？
+",在Apache Doris中，如果在一个节点上部署了多个BE（Backend Engine），并且想要缩减节点数量，需要先通过DECOMMISSION方式手动将该节点上的BE服务停止并下线，然后再进行节点的缩容操作。
+9b799d38-c18a-11ee-833b-b026288862a5,"在Doris中新建了一张表，在MySQL中可以查到，但在Doris中查不到，怎么办？
+",可能是因为Doris的元数据没有及时刷新导致的。可以尝试手动刷新元数据，或者检查Doris的版本是否存在元数据刷新的问题。
+9b771828-c18a-11ee-8a86-b026288862a5,"在使用mysql -doris整库同步时，如果在mysql中增加字段，增加表，doris会自动同步过去吗？还是需要手动在doris中操作？
+测试了一下，增加字段可以同步，但增加表不行，修改字段也不同步，需要做什么操作吗？
+",是的，增加字段可以自动同步，但增加表和修改字段需要手动在doris中操作。如果在mysql中新建表后，在doris中也新建了，但数据几分钟了还没有同步，可能需要手动触发同步操作。
+f882ad44-c17f-11ee-8c22-b026288862a5,"部分列更新 set enable_unique_key_partial_update=true 这个参数可以设置全局吗,",",set global"
+8c365c24-c164-11ee-80a5-b026288862a5,"大佬，doris可以把map结构的数据，里面的k和v转化为 列吗,",",可以"
+9b70eb82-c18a-11ee-8011-b026288862a5,"我之前json数据我创建为text了，现在想要修改为json类型的，发现报错，不知道怎么回事,",",Doris Schema Change 只有在表数据完整且非均衡状态下才可以开始。如果表的某些数据分片副本不完整，或者某些副本正在进行均衡操作，则提交会被拒绝。"
+9b704046-c18a-11ee-87d8-b026288862a5,"doris可以修改列的数据类型嘛,",",用户可以通过 Schema Change 操作来修改已存在表的 Schema。目前 Doris 支持以下几种修改:，增加、删除列，修改列类型，调整列顺序，增加、修改 Bloom Filter，增加、删除 bitmap index"
+9b6f95de-c18a-11ee-a745-b026288862a5,"@Petrichor  大佬您好， unuqie模型可以修改列名称吗？ doris 1.2,",",schema change 支持的"
+907462cb-c18a-11ee-acde-b026288862a5,Doris是否支持RAID？ ,Doris在数据压缩和均衡过程中对RAID是无感的，因此支持RAID。
+8f801889-c195-11ee-bc72-b026288862a5,"Doris支持哪些云存储服务？
+",Doris支持所有云商的对象存储，包括AWS的S3和阿里的OSS，它们可以使用相同的参数进行配置。
+22a30406-c173-11ee-80cd-b026288862a5,"如何在Apache Doris中创建外部表访问SqlServer？有参考样例可以看吗？
+","可以使用以下参数创建外部表访问SqlServer：
+   jdbc catalog mssql
+   例如：
+   CREATE EXTERNAL TABLE IF NOT EXISTS db_name.table_name
+   (column_list)
+   COMMENT 'comment'
+   LOCATION 'jdbc:sqlserver://host:port;databaseName=dbname;user=username;password=password;encrypt=true;trustServerCertificate=false;loginTimeout=30;'
+   PROPERTIES('jdbc.driverClassName' = 'com.microsoft.sqlserver.jdbc.SQLServerDriver', 'jdbc.catalog' = 'mssql');
+   注意：需要将上述参数中的host、port、dbname、username和password替换为实际的SqlServer连接信息。"
+8f7cc4f7-c195-11ee-a6fc-b026288862a5,"Apache Doris的OUTFILE支持导出阿里的OSS吗？
+","是的，OUTFILE支持导出到阿里的OSS。 
+"
+90607b0e-c18a-11ee-83af-b026288862a5,在执行BACKUP SNAPSHOT后，通过show backup查看备份状态时，报错ERROR 2020 (HY000): Got packet bigger than 'max_allowed_packet' bytes，有遇到过这个问题的吗？,这个问题可能是由于备份数据量过大，导致返回的数据包大小超过了max_allowed_packet参数设置的大小。可以尝试增大max_allowed_packet参数的数值，或者通过分批备份的方式来解决这个问题。
+f87e6679-c17f-11ee-9297-b026288862a5,"Doris中对分区数有没有限制？一张表最大能添加多少个分区？
+","Doris中默认分区数的限制是500个，但可以通过修改配置来改变这个限制。可以通过 `FROM(...) TO (...) INTERVAL ...` 来批量创建分区，如果需要创建很多历史分区的话。
+
+这样的QA对可以帮助其他Doris用户在遇到类似问题时快速找到答案。"
+f87cfc6b-c17f-11ee-81a8-b026288862a5,"对历史数据如果要搞分区有什么好的解决方案吗？
+","可以通过添加分区来解决，使用ALTER TABLE语句添加分区，例如：ALTER TABLE example_db.my_table，ADD PARTITION p1 VALUES LESS THAN (""2015-01-01"")。"
+8f7610e3-c195-11ee-a34a-b026288862a5,Doris 2.x版本的FE支持切换catalog吗？,切换catalog switch就可以了
+1548043d-c17a-11ee-a3b7-b026288862a5,我使用insert into values语句插入了8819条数据，但在Apache Doris库里只查询到了7400多条数据，日志只有内存发生gc的告警。有遇到过这种情况吗？,你可以尝试打开严格模式，查看是否设置为true
+839ec443-c18a-11ee-9091-b026288862a5,"各位大佬，uniq key 或者那几个模型，对key的要求是不是不能用text之类的啊,我们要是主键包含text类型的应该怎么做啊,,","换成varchar,key列不能是string"
+839be244-c18a-11ee-a971-b026288862a5,"Doris目前可以热挂载磁盘吗？
+",目前Doris还不支持热挂载磁盘，需要通过扩容节点来实现磁盘扩容。
+8f6f000b-c195-11ee-ac35-b026288862a5,"routine load 作业配置了max_filter_ratio属性，暂停后能将这个属性给删除吗
+",可以改成0
+80191615-c187-11ee-81a9-b026288862a5,使用delete删除数据会有什么影响吗？ ,删除数据不会立即释放磁盘空间，但Doris会自动进行compaction来清除垃圾数据，无需手动处理。
+865d8c3c-c178-11ee-a777-b026288862a5,"Doris的BE挂的时候如果有数据通过streamload方式入库，这些数据丢失了，Doris有没有机制还原的？
+",1台BE挂了不会丢失数据，会自动同步成多副本。如果数据确实丢失了，可以通过人为捕获异常处理待恢复重试。另外，也可以考虑使用Doris的tablet恢复功能来支持这个场景。
+0e635249-c17a-11ee-be97-b026288862a5,"Doris报错""tcp listen failed, errno=98, errmsg=Address already in use""是什么原因？",这个错误通常是由于端口被占用导致的，可以通过查看端口占用情况并释放端口来解决。
+0876a463-c17a-11ee-bc06-b026288862a5,"我的Apache Doris的BE启动不起来，错误日志在哪里看？
+","到BE的log目录下查看be.out文件。
+"
+fe690591-c17f-11ee-a3f3-b026288862a5,"Doris可以作为时序数据库使用吗？
+",是的，Doris可以作为时序数据库使用。它可以处理大量的时序数据，并提供灵活的查询和分析功能。
+5f3c32e1-c17c-11ee-b5e0-b026288862a5,"在Apache Doris中，我已经创建了jdbc的外表，如mysql.dbname.tablename，我想在Spark中执行这个外表的同步操作，但是执行不了，有什么解决方法吗？
+",在Apache Doris中，Spark只能读取Doris的OLAP表，无法直接读取外表。如果需要在Spark中执行外表的同步操作，可以使用spark.read.jdbc将外表数据读取出来，然后再通过insert操作将数据写入Doris。虽然这样需要维护额外的连接和账户密码，但是是目前的解决方法之一。
+865d351f-c178-11ee-bc83-b026288862a5,"请问，咱们这个Doris支持在hive,hudi,paimon这种架构上建物化视图吗？,",",2.1会支持"
+7f99eff2-c182-11ee-922d-b026288862a5,"如何查看表是否丢失副本？
+","可以通过执行命令""show tablet <tablet_id>""，然后查看返回结果的最后一列来确认表是否丢失副本。"
+08718806-c17a-11ee-a412-b026288862a5,"请问普通的drop 表 库 ，怎么才能释放硬盘空间？,,3q",",直接drop 不加 force的话，不回放入回收站，这个是防止误删除，recover时候用的，和 fe.conf catalog_trash_expire_second 参数有关系，默认为1天，1天后会将删除的表自动放到trash中，如果加了force就会直接放入trash中，此时可以通过admin clean trash去清理。"
+086d9f2f-c17a-11ee-925e-b026288862a5,"请教下大家，flink写doris的时候报错（已写入doris，但是重新再写其他数据进doris），我尝试改了写入的表名，还是报同样的错。Caused by: org.apache.doris.flink.exception.DorisException: Load status is Label Already Exists and load job finished, change you label prefix or restore from latest savepoint!，at org.apache.doris.flink.sink.writer.DorisStreamLoad.abortPreCommit(DorisStreamLoad.java:155)，at org.apache.doris.flink.sink.writer.DorisWriter.initializeLoad(DorisWriter.java:118),",",改下label prefix  ，重复了"
+70ecd800-c187-11ee-b5f1-b026288862a5,"多个flink job写同一个doris表会不会有问题？
+",不会。
+effad3cd-c107-11ee-a3ca-b026288862a5,"Doris命令行查看报错，如何查看当前查询语句？
+A: ","可以通过show proc ""/current_query_stmts""命令来查看当前http请求的查询语句。"
+74f6eacc-c182-11ee-9e39-b026288862a5,"Doris怎么给视图权限给用户,,我用user1连接之后，视图数据查看不了",",grant select_priv on xxx to 'user1',"
+7564f8cd-c178-11ee-85cc-b026288862a5,"如何查看表的副本数量？
+","使用命令""show tablet <tablet_id>""，最后一列显示副本数量。"
+7cde1506-c195-11ee-9c0e-b026288862a5,"请问下routine load任务暂停太久了，offset过期了，启动不了怎么办，需要重新配任务吗,,",",可以修改任务调整offset,好的谢谢"
+abacfaa5-c174-11ee-85d9-b026288862a5,"2.0.3版本支持主键自增了吗,,",",还不支持,2.1支持"
+1e9c818c-c17e-11ee-aea3-b026288862a5,"遇到errCode = 2, detailMessage = Failed to get query fragments context. Query may be timeout or be cancelled. host: 这个问题，改什么参数可以解决啊？",你可以尝试修改查询超时参数来解决这个问题。具体操作可以参考https://doris.apache.org/zh-CN/docs/data-table/advance-usage/#query-timeout。同时，也建议对查询涉及的表进行优化，以提高查询性能。
+690769fb-c18a-11ee-a16f-b026288862a5,"如何找到当前SQL的执行计划？
+","在一个session里执行""set enable_profile=true;""，然后在这个session里执行这个SQL，最后在web上下载执行计划即可。如果在web上找不到你的SQL，可能是因为开启了全局的profile，并且有其他调度查询在跑，导致打印了很多profile。"
+a1453957-c174-11ee-b2d0-b026288862a5,"在Apache Doris中，如何进行批量列更新操作？
+",可以通过使用Insert into select语句来实现批量列更新。具体操作可以参考官方文档中的部分列更新部分：https://doris.apache.org/zh-CN/docs/data-operate/update-delete/partial-update
+529fbc7c-c17c-11ee-bcc4-b026288862a5,"我的一台be挂掉了，启动后，alive一直是false，有大佬知道原因吗？
+",你可以查看be.out日志，根据query_id去审计日志查一查sql，同时可以使用dmesg -T命令查看内存是否被打满了，以及fe.audit.log查看审计日志。可能是混部导致oom了，先查看本次挂的问题，再回溯之前挂的。
+68fc45c9-c18a-11ee-8f51-b026288862a5,执行show partitions from 表名;命令后结果为空，是为什么？ ,"可能是表中没有分区数据，可以通过show create table 表名;查看表的分区情况。
+"
+eff90bce-c107-11ee-a373-b026288862a5,"请问下，doris建表的时候，时间字段默认值可以给当前时间吗,,好的,",datetime的可以
+a141c401-c174-11ee-a8ce-b026288862a5,"doris支持python udf么？,主要是AI的函数包,",不支持
+60db3565-c18a-11ee-9940-b026288862a5,"一个建好的表已经有数据了 可以改成动态分区表吗,",",不可以"
+48d9cf09-c17c-11ee-baf8-b026288862a5,"如何在Apache Doris中读取Hive外部表时进行鉴权？
+",可以通过在连接参数中传入用户名和密码来进行鉴权，例如'hadoop.username' = 'hive'用于传入用户名，密码可以通过类似的方式传入。
+fe710eef-c179-11ee-b1c3-b026288862a5,"doris root密码忘了咋重置呢？,,,","https://doris.apache.org/zh-CN/docs/admin-manual/privilege-ldap/user-privilege?_highlight=%E5%BF%98%E8%AE%B0#%E4%B8%80%E4%BA%9B%E8%AF%B4%E6%98%8E,这里,[表情]"
+ee4b585b-c17f-11ee-80b7-b026288862a5,"doris表咋设utf8mp4？没找到,",",Doris 支持且仅支持 UTF-8"
+13e91353-c173-11ee-b9d9-b026288862a5,"分区分桶字段建表后还能变更么,",",不能变更了"
+ee49ee38-c17f-11ee-9141-b026288862a5,Doris可以使用JDK11吗？,当前Doris使用的是JDK8，JDK11的适配工作正在进行中，预计会稍微延迟发布。
+54fcdb74-c18a-11ee-8f65-b026288862a5,"如何在Apache Doris中统计每个表的数据量？
+",使用`SHOW data `命令可以获取每个表的数据量信息。
+54f586b1-c18a-11ee-a110-b026288862a5,"在使用 Apache Doris 进行部分列更新时，为什么会出现错误提示 ""Partial update should include all key columns, missing: id""？
+","在进行部分列更新时，需要包含所有主键列。如果出现错误提示 ""Partial update should include all key columns, missing: id""，说明更新操作中缺少主键列 id。需要确保更新操作中包含所有主键列。
+"
+db99cac5-c107-11ee-ae68-b026288862a5,"Doris表的一个副本，所有的tablet会均匀的分布到所有的BE节点上吗？
+",Doris会将所有的tablet副本均匀地分布到所有的BE节点上，以保证数据的高可用性和容错性。
+4c4465d9-c18a-11ee-90f5-b026288862a5,Doris支持设置变量吗？,"Doris 2.0版本之后支持设置变量，之前的版本不支持。如果使用1.2.6版本，可以考虑其他替代变量的方法，但是传参可能需要走变量的方式。
+"
+4c3777ec-c18a-11ee-91eb-b026288862a5,"Doris支持WITH ROLLUP语法吗？
+",Doris目前不支持WITH ROLLUP语法。
+13e65b04-c173-11ee-aeaa-b026288862a5,"大佬，我从mysql同步数据时，把doris中的一些数据字段给更新没了，能回退吗,,在更新下[抠鼻]",",这个没办法回退啊,"
+48d2ee1b-c17c-11ee-b44d-b026288862a5,"我在使用Spark查询Doris数据时，可以创建内部表或者视图吗？
+",目前Doris不支持在Spark中创建内部表或视图。只能创建临时表，创建视图会报错。这个功能在2.0.1版本中也不支持。
+4234661a-c18a-11ee-8809-b026288862a5,"doris支持导入oss里面的parquet格式吗，可以指定目录导入吗,,",",可以,使用S3 TVF"
+9bfc9fec-c174-11ee-ad8d-b026288862a5,"alter table add partition支持批量添加分区吗？
+","可以批量添加分区，例如：ALTER TABLE partition_test_tbl，ADD PARTITION p20230828 VALUES [(""2023-08-28""), (""2023-08-29"")),，ADD PARTITION p20230829 VALUES [(""2023-08-29""), (""2023-08-30"")),，ADD PARTITION p20230830 VALUES [(""2023-08-30""), (""2023-08-31""));"
+810cb820-c164-11ee-9a2f-b026288862a5,"如何通过Flink Connector将Kafka中的JSON数据写入Apache Doris？
+",可以通过新增配置 'sink.properties.format' = 'json' 'sink.properties.read_json_by_line' = 'true' 来解决，这样就可以通过JSON格式写入Doris了。
+422e5188-c18a-11ee-9b87-b026288862a5,"@苏奕嘉@SelectDB 大哥，部分列更新写入报这个错怎么解决呀？> 5025 - Insert has filtered data in strict mode, tracking_url=null,",",把严格模式关掉"
+653e262c-c187-11ee-9353-b026288862a5,"Doris中副本数量只能在建表时处理吗？后面再处理只能是重建表吗？
+",可以修改。
+38052b0c-c18a-11ee-be49-b026288862a5,"@苏奕嘉@SelectDB 大佬，目前doris有没有类似于 Hologres 这种 jsonNB的这种处理啊，如果能够高效的进行查询，其实我们这里就不需要打宽进行往doris进行存储了,",",你测下doris的json，还是可以的。另外后面还会有varint。"
+f71831fa-c179-11ee-9a5f-b026288862a5,"大佬们，从kafka上游入数据到doris的话，什么方式比较好，我现在是通过调用stream load进来，当load任务过多时会影响正常查询，当前配置为96核，256g,",",RoutineLoad"
+13e4da94-c173-11ee-8b5d-b026288862a5,"Apache Doris中delete语句执行时间过长，应该如何优化呢？
+","可以尝试以下优化方式：
+1. 将where条件放在前缀索引中，可以提升性能。
+2. 考虑为相关字段添加索引，以加快数据查找过程。
+3. 将数据放在一个分区分桶内部，这样删除操作会直接物理删除，效果会更好。
+4. 考虑调整表的副本数限制，可以通过配置max_replica_count_when_schema_change来限制副本数，避免FE OOM的问题。"
+e6d20208-c17f-11ee-9494-b026288862a5,"在使用Apache Doris的Streamload导入JSON数据时，如何将JSON中的时间戳转换为时间格式datetime？
+",可以使用cast进行转换，具体可以参考官方文档中关于Streamload的部分，里面有很多相关的例子和说明。具体可以参考链接：https://doris.apache.org/zh-CN/docs/data-operate/import/import-way/load-json-format
+950f8524-c174-11ee-90b6-b026288862a5,"大佬们，都有doris多副本了，还有必要做raid吗,,好的，多谢了",",不用做raid,"
+950dfd2b-c174-11ee-ab6f-b026288862a5,Doris建表能建map类型字段吗？ ,"可以的。你可以使用Map<STRING, INT>类型来定义map字段，例如：CREATE TABLE IF NOT EXISTS test.simple_map (，`id` INT(11) NULL COMMENT """",，`m` Map<STRING, INT> NULL COMMENT """"，) ENGINE=OLAP，DUPLICATE KEY(`id`)，DISTRIBUTED BY HASH(`id`) BUCKETS 1，PROPERTIES (，""replication_allocation"" = ""tag.location.default: 1"",，""storage_format"" = ""V2""，);"
+d9f93133-c17f-11ee-a7fb-b026288862a5,"Doris是否支持跨库查询并将结果写入第三个库？
+",支持。可以通过jdbc catalog进行跨库查询，并支持回写操作，无需建立虚拟表（视图），可以直接使用insert into select语句进行操作。同时，Doris还支持update操作。更多信息可以参考官方文档：https://doris.apache.org/zh-CN/docs/lakehouse/multi-catalog/
+6991e60c-c195-11ee-99f5-b026288862a5,Doris 有replace 或者upsert 语法吗？,"Doris在最新的版本中已经支持了REPLACE和UPSERT语法。，1. REPLACE语法：，REPLACE语句用于插入新的数据行，如果数据行已经存在，则先删除原有数据行，再插入新的数据行。它的语法与INSERT语句类似，只是将INSERT关键字替换为REPLACE。，示例：，```，REPLACE INTO table_name (column1, column2, ...)，VALUES (value1, value2, ...);，```，2. UPSERT语法：，UPSERT语句用于插入新的数据行，如果数据行已经存在，则更新原有数据行。它的语法与INSERT语句类似，只是将INSERT关键字替换为UPSERT，并在语句末尾添加ON DUPLICATE KEY UPDATE子句来指定更新的列和值。，示例：，```，UPSERT INTO table_name (column1, column2, ...)，VALUES (value1, value2, ...)，ON DUPLICATE KEY UPDATE column1 = value1, column2 = value2, ...;，```，在这个示例中，你需要将""table_name""替换为你要插入数据的表名，""column1, column2, ...""替换为你要插入数据的列名，""value1, value2, ...""替换为你要插入的具体值。，需要注意的是，REPLACE和UPSERT语句都要求表中存在主键或唯一索引，以便进行行的替换或更新操作。，希望这个回答对你有帮助！如果你有任何其他问题，请随时提问。"
+c6c96a93-c107-11ee-a3cc-b026288862a5,"如何将表从Doris数据库中删除并移至回收站（trash）？
+",直接drop 不加 force的话，不会放入回收站，这是为了防止误删除。如果想将表移至回收站，可以使用recover命令进行恢复，或者等待fe.confcatalog_trash_expire_second参数设定的时间后，表会自动放入回收站。如果加了force参数，表会直接放入回收站。可以通过admin clean trash命令清理回收站中的表。
+699015e5-c195-11ee-b91d-b026288862a5,"在Apache Doris中出现""There are missed versions among rowsets""是什么原因？
+",这个错误通常是由于数据不一致或者版本丢失导致的。你可以检查数据的一致性，以及确认是否有版本丢失的情况发生。
+b1ddd5d6-c107-11ee-84e3-b026288862a5,"怎么查看表状态啊？查看表的state是不是normal,",",ADMIN SHOW REPLICA STATUS FROM 表名，WHERE STATUS != ""OK"";"
+1e0470e3-c18a-11ee-b031-b026288862a5,"可以通过insert into select字段更新unique表里面的某个字段吗？
+",是的，Apache Doris 2.0.2版本开始支持部分列更新，可以使用insert into select方式来更新表中的部分字段。
+60bd14ac-c178-11ee-9b68-b026288862a5,"大佬们 我想查doris执行过的s'q'l应该怎么查,",",审计日志"
+e536b68a-c179-11ee-92af-b026288862a5,"通过datax读取mongode数据写入doris时报错，报错信息为""actual column number in csv file is less than schema column number""，并且在写入ReturnMsg字段时也会报错，有大佬能帮忙看看吗？
+",这个问题可能是由于分隔符不匹配导致的。请检查数据源的分隔符是否与Doris表的分隔符一致。
+e535b4a1-c179-11ee-975f-b026288862a5,Doris支持自定义函数吗？ ,是的，Doris支持自定义函数。
+e534b574-c179-11ee-9964-b026288862a5,"Apache Doris中出现""ERROR (heartbeat mgr,25) [BDBJEJournal.write():182] write bdb failed. will exit.""这个错误是什么原因导致的？如何分析和解决？",这个错误通常是由于FE写入BDB失败导致的自动退出。可以通过查看FE的日志来进一步分析失败的原因，可能是磁盘空间不足、权限问题或者其他IO错误。可以尝试检查磁盘空间、查看FE的权限设置，以及检查IO错误来解决这个问题。
+6b3853cb-c178-11ee-8240-b026288862a5,如何停止一个大查询？ ,可以通过show processlist查看正在运行的查询，然后使用kill query来停止指定的查询。同时也可以参考Doris官方文档中的query-profile-action来了解更多关于取消查询的操作。
+ff511ba5-c172-11ee-a0cf-b026288862a5,"doris  hive-catalog-shade.jar 接入湖表，hive中有es表，导致不能show tables ,这个导包换包特别难搞,",",目前不支持"
+d9ecf36c-c17f-11ee-af17-b026288862a5,"routine load 消费过后，即使存在消费组，依旧会从最开始消费，有没有从上次消费点开始消费的方法？
+",如果删除了routine load任务，之前的消费offset记录也会被删除。如果想从指定的offset开始消费，可以单独指定offset，或者pause routine load，再resume后，routine load会根据之前消费的offset进行消费。
+ff509170-c172-11ee-8a2f-b026288862a5,"大佬，小白求教一下，doris是不是 不能直接基于外表 建立物化视图,,,",",2.1 可以"
+2e24c499-c17c-11ee-a5f4-b026288862a5,"问一下doris支持kudu数据的导入或者直查么？,",",不支持"
+5cbd5da8-c195-11ee-bae1-b026288862a5,"Doris可以限制内存使用率吗？
+",可以。如果要限制整个BE节点的内存使用率，可以在be.conf 文件添加 mem_limit=xx% 来限制，默认为80%。如果要设置单个查询或者一组查询的内存使用率，可以使用WorkLoadGroup来限制。
+e52d44a9-c179-11ee-954b-b026288862a5,Apache Doris 1.2版本的unique模型能否存储bitmap数据类型？,可以存储，但需要在SQL中加上bitmap_union，并且在1.2版本中需要设置enable_agg_state=true。如果遇到问题，可以尝试升级到2.0.2版本。
+f89ffad9-c189-11ee-9ed5-b026288862a5,"如何单独删除Apache Doris中的一个分区数据？
+","可以使用TRUNCATE TABLE命令来删除指定分区的数据，格式为TRUNCATE TABLE [db.]tbl[ PARTITION(p1, p2, ...)]; 如果需要删除分区本身，可以使用ALTER TABLE命令，格式为ALTER TABLE example_db.my_table，DROP PARTITION p1;"
+f71265da-c172-11ee-ada9-b026288862a5,"Doris数据库查询字段内容时是否区分大小写？
+",是的，Doris数据库的默认字符集是区分大小写的。一般来说，大小写敏感通常指数据库名、表名、字段名。
+77733cc6-c164-11ee-af62-b026288862a5,"BE磁盘扩容后，trash目录文件量急剧增加，导致磁盘利用率触发自动清理回收站，怀疑是有一批tablet在不同BE节点间来回复制删除，如何解决这个问题？
+",可能是数据删除或过期流程导致的，可以查看数据删除操作的日志，确认是否有大量数据删除操作。另外，也可以检查Snapshot占用情况，以及副本均衡调度是否有关联。
+eeb47207-c189-11ee-8485-b026288862a5,"设置完成Apache Doris的root admin账号密码之后，再次登录时不输入密码也可以登录，需要在设置什么吗？
+",这是为了忘记密码时可以通过改密码来重置密码。127.1登录时不需要密码是正常的，因为是本地访问fe。
+a44c45b2-c107-11ee-b469-b026288862a5,"DATE_PART  请问下doris支持这个函数嘛,",",这个函数在Doris中应该是分开了，比如DAYOFWEEK、WEEKOFYEAR 这些，你可以看下有你需要的函数不，https://doris.apache.org/zh-CN/docs/sql-manual/sql-functions/date-time-functions/weekofyear"
+e5ce098b-c189-11ee-804e-b026288862a5,如何在Apache Doris 2.0.1版本中创建中文列名？,"设置全局参数 enable_unicode_name_support 为 true，然后使用建表语句创建中文列名即可。例如：set global enable_unicode_name_support = true; create table 表名 (中文列名 数据类型, ...);"
+cd4933b8-c17f-11ee-bf14-b026288862a5,"在使用Apache Doris的streamload导入数据时，如果有一个主键冲突，本批数据是否会导入？
+",会覆盖，不会不导入。这个本身就是支持upsert，没办法阻塞不导入。
+ce2981ab-c179-11ee-a37e-b026288862a5,"大佬，对已有数据的分区表，调整分区分桶，doris会对历史数据进行重新分桶分区吗？,",",不会"
+a44af7dd-c107-11ee-b8ca-b026288862a5,"若是对正在使用中集群 be节点下线，是直接停be进程， 还是drop backends的，比较推荐哪个？,,",",先下线,ALTER SYSTEM DECOMMISSION BACKEND ""be_host:be_heartbeat_service_port"";"
+60b16197-c178-11ee-a0fd-b026288862a5,"Doris安装be的时候显示Please disable swap memory before installation.请问，这个必须要设置关闭swap吗?,麻烦哪位老师解答一下，非常感谢,,好的，非常感谢",",,建议关闭，新版本会要求强制要求,"
+8fc1be34-c174-11ee-8a5b-b026288862a5,"CREATE TABLE sms_blacklist (，mobile VARCHAR(20) COMMENT '手机号',，gmtCreate DATETIME COMMENT '创建时间'，)，UNIQUE KEY(`mobile`)，COMMENT 'sms数据黑名单表'，DISTRIBUTED BY HASH(`mobile`) BUCKETS 10，PROPERTIES(，""replication_num"" = ""1"",，""enable_unique_key_merge_on_write"" = ""true""，);，这个是可以默认内建前缀索引的吧？以mobile作为查询条件是可以用到前缀索引的吧,",",UNIQUE KEY(`mobile`)中的mobile就是主键+前缀索引"
+c5274f02-c189-11ee-8e39-b026288862a5,"我在Doris中新增了一个BE节点，但查询速度反而下降了，这种情况正常吗？
+",不应该。可能是数据未均衡导致的，可以通过show backends查看tablet数量，确保数据均衡。
+c6b27bea-c179-11ee-820a-b026288862a5,在Apache Doris 1.2.6版本中，如何设置insert_timeout参数以解决导入历史数据超时的问题？,可以直接设置query_timeout参数，命令为：set global query_timeout=10240。设置后需要刷新连接，然后再执行show命令验证是否生效。
+f70fa752-c172-11ee-ac97-b026288862a5,如何在openEuler x86系统上安装noavx2版本的Apache Doris？,"首先，使用命令""cat /proc/cpuinfo | grep avx2""查看CPU是否支持avx2指令集，如果没有返回值，则说明CPU不支持avx2。在这种情况下，可以安装noavx2版本的Apache Doris。请注意，avx2支持与系统架构无关，而是与CPU相关。"
+836d5ff0-c174-11ee-beca-b026288862a5,"doris什么时候会支持cdc,是通过cdc读取doris的方式,",",,目前还不支持，"
+c51dae75-c189-11ee-971b-b026288862a5,如何将Apache Doris表中大量的数据导出到csv文件中？ ,可以使用outfile方式进行导出，具体操作可以参考https://doris.apache.org/zh-CN/docs/data-operate/export/outfile。如果在导出过程中遇到字段缺失的情况，可以通过show create table命令查看表结构，检查字段类型是否支持导出。
+4161dc43-c187-11ee-a0b1-b026288862a5,"doris能不能写类似存储过程的功能,,",",各位大佬,不能"
+c51658bb-c189-11ee-aad5-b026288862a5,"Doris是否支持Oracle的CLOB类型？
+",Doris 2.0.0版本开始支持Oracle的CLOB类型，可以考虑升级到该版本。
+546caa54-c178-11ee-8523-b026288862a5,"在Apache Doris中，unique表模型的upsert语法是什么？
+","在unique表模型中，可以使用upsert语法进行数据的插入和更新操作。具体语法为INSERT INTO table_name VALUES (...) ON DUPLICATE KEY UPDATE col1=expr1, col2=expr2, ...。"
+60af4930-c178-11ee-b82c-b026288862a5,"@王磊 老师，我想请教一下，我在批量insert数据的时候，每次只能进入部分数据，表中存在相同主键的数据。插曲的时候没有报错，这可能是因为什么原因,",",2.0 支持了"
+b999b4f1-c189-11ee-b267-b026288862a5,"在Apache Doris中，priority_network参数是否可以在集群初始化启动后修改？
+",不可以，在集群初始化启动前就需要将priority_network参数设置好，初始化后不要再修改。
+b9981e33-c189-11ee-8079-b026288862a5,"Doris启动时出现""wait catalog to be ready. FE type: UNKNOWN. is ready: false, counter: 2101""错误怎么办？","这个错误通常是由于网络配置问题导致的，可以检查网络配置是否正确，确保FE和BE节点之间可以正常通信。
+"
+4651cc77-c182-11ee-877a-b026288862a5,如何查看机器是否支持avx2指令集？,"可以通过命令""cat /proc/cpuinfo | grep avx2""来查看，如果没有avx2的相关信息，则表示不支持。在这种情况下，需要使用不支持avx2指令集的包。"
+b62da158-c17f-11ee-9ba6-b026288862a5,"大佬们  我现在有个场景就是计算用户标签，计算完了然后修改存在doris库中的标签，现在有个问题就是  直接update很慢，目前采用的是 批量查出来然后发送到kafka去做修改，但是还是很慢，用的是Unique这个模型，   还有什么好的方式嘛,,",",用部分列更新把,很不错啊"
+54694fe0-c178-11ee-afe8-b026288862a5,"当涉及到大表join计算指标时，执行SQL会报OOM，除了将SQL拆分成多段执行，还有什么办法吗？
+",可以考虑使用物化视图，将计算结果直接存储为宽表；控制join的规模，尽量减小join的数据规模；优化SQL，尽量减少不必要的计算和数据量。
+b98e4124-c189-11ee-ae84-b026288862a5,"如何对聚合模型表的某一个value列进行update操作？
+",可以通过 replace_if_not_null 来实现部分列的更新，具体可以参考之前的案例。只有唯一表才能直接执行update操作。
+b98c568f-c189-11ee-9901-b026288862a5,"2.0.2   flinkcdc同步mysql数据。，有哪些办法，可以减少数据同步的延迟时间,",",checkpoint 调小"
+41549f33-c187-11ee-a9be-b026288862a5,"如何解决在Apache Doris中获取表列表时写锁超时的问题？
+get tableList write lock timeout
+",可能的解决方案包括调整FE的meta目录到SSD磁盘、调整FE和BE的超时参数（如remote_fragment_exec_timeout_ms、txn_commit_rpc_timeout_ms、thrift_rpc_timeout_ms）为120000ms，并在客户端设置重试机制。此外，如果在云服务器上部署，建议采用高性能磁盘。
+b62825a9-c17f-11ee-96b2-b026288862a5,"麻烦问一下大家，我的routine load消费间隔有点大，数据量其实不大，目前任务才70多个，三台be，有什么优化思路么，参数设置如下图,,好的，task处理并行度的配置需要修改么，我目前都是默认,",",""max_batch_interval"" = ""3"",，""max_batch_rows"" = ""300000"",，""max_batch_size"" = ""209715200"",，时间到达3s，或者数据到达条数都会开始写。批次稍微设置大，时间控制好就行。,,并行度和kafka topic 的partition保持一致就行"
+c6a6fc38-c179-11ee-b4b2-b026288862a5,"doris使用hive catalog的时候不支持使用hive的function吗？,,",",不支持，如果是Hive的UDF，可以移植使用doris UDF框架执行,好的，谢谢"
+54683077-c178-11ee-b5e8-b026288862a5,"各位大佬,像这种catalog同步数据异步的怎么找到这个任务kill掉呢,,",",可以SHOW PROCESSLIST看看，然后kill掉,1"
+a01a3821-c189-11ee-b536-b026288862a5,"在Apache Doris中，如何实现递归操作或者用公式将结果传递给下一条数据？
+",可以通过编写UDF（用户自定义函数）来实现递归操作或者将结果传递给下一条数据。但需要注意，使用递归UDF可能会导致性能较慢的问题。
+7e3ec418-c174-11ee-9c4f-b026288862a5,"如何在Apache Doris中设置大小写不敏感？
+",在fe.conf中设置lower_case_table_names=true即可实现大小写不敏感。更多信息可参考https://doris.apache.org/zh-CN/docs/advanced/variables/#%23支持的变量。
+7e3e047f-c174-11ee-b364-b026288862a5,"Doris 2.0.2 表名是区分大小写的吗？可以改为不区分大小吗？
+如果已经有数据导入了，需要重新安装才能修改表名的大小写设置吗？",是的，如果已经有数据导入，需要重新安装才能修改表名的大小写设置。
+a1b4f944-c178-11ee-86c1-b026288862a5,"doris 2.x 支持多表关联更新和删除吗,",",支持"
+a95ddc8e-c182-11ee-93ac-b026288862a5,Apache Doris中出现FE之间时钟不统一的问题怎么办？ ,可以通过调整 max_bdbje_clock_delta_ms 改变最大阈值，不过建议将服务器时间进行同步。
+5ccb0ba2-c17a-11ee-b6e9-b026288862a5,"如何实现通过读取MySQL的binlog来实时同步数据到Doris？
+",可以使用Flink CDC来实现实时同步，无需编写代码，直接使用Flink SQL即可。
+51485447-c197-11ee-9a11-b026288862a5,"大佬们，spark-doris-connector对doris的表只能追加写吗，覆盖写只能写入另一张表再替换当前表吗,,哪一个版本？我试了1.2版本的连接器不能",",支持overwrite,"
+1cb88ed2-c18b-11ee-9ec1-b026288862a5,同步数据时报错ERROR 1105 (HY000)，异常信息为Failed to create partition，报错原因是什么？,可能是创建分区的操作耗时过长导致失败。建议检查配置和分析操作耗时，可以参考Doris源码中的org.apache.doris.datasource.InternalCatalog#createPartitionWithIndices，也可以参考官方文档中的Q2排查建表操作常见问题。
+5cca4c2a-c17a-11ee-bf6a-b026288862a5,"2.0.2是没有自增键功能么,,,",",目前还没有,这个功能得到 2.1,好的"
+9799dbbd-c17c-11ee-91b5-b026288862a5,"现在支持 多表join的查询，来作为物化视图的创建条件吗？,",",2.1会支持，最近发版本吧"
+1633d518-c18b-11ee-ae9f-b026288862a5,"如何对通过explode_json_array_json炸出来的a,b列进行类似collect_set的聚合，但希望a,b值的顺序要和原始的顺序一一对应？
+","可以使用sort_array函数对a和b进行排序，然后再进行聚合操作，这样可以保证a,b值的顺序一一对应。"
+5140bf5d-c197-11ee-83b6-b026288862a5,"使用routine load拉取Kafka消息时，只有一两个分区在消费，消费速率很低，有什么排查思路建议吗？
+",可能是分区积压的数据导致routine load消费不动。可以通过查看topic积压的数据量来确认，如果积压数据量较大，可以考虑增加routine load的并发度或者调整参数以提高消费速率。
+9de75123-c17e-11ee-8b7d-b026288862a5,"我想问下，我有集群了两台机器，副本是1个，是不是因为这个原因导致我另外一台机器挂了，主要的这台没有掉另外一台的数据了，导致打开表会报错找不到副本,",",你如果只有1副本，一份数据只会在一个机器上，如果你某个节点挂掉了，集群中数据就不全了（挂掉的那台机器上存有数据）。正常Doris集群生产建议是三个be节点 数据使用三副本存储"
+a01d85aa-c187-11ee-83a2-b026288862a5,"如何将SQL Server数据库中的image类型字段存储到Doris中？
+",可以将image类型字段转换为base64字符串后存储到Doris中。
+3ea1dd47-c197-11ee-85ec-b026288862a5,"doris 集群启动的时候是  master 启动的命令是  sh start_fe.sh --daemon   ， 非master 的 fe 启动的命令是 sh start_fe.sh --helper masterip:9010 --daemon 吗？,,",",是的，非master的fe第一次启动时需要加--helper,如果是新的fe添加到集群，则需要--helper"
+4560ba24-c173-11ee-99b7-b026288862a5,Doris的副本数对系统的可用性和自愈能力有什么影响吗？ ,Doris的副本数对系统的可用性和自愈能力有着重要影响。单副本情况下无法自动修复，设置多副本可以提高系统的可用性，并在异常情况下能够自愈，尽可能避免出现问题，即使再出现Failed to get scan range也能手动set bad快速恢复。因此，设置多副本可以有效提高系统的稳定性和可用性。
+d62d1241-c174-11ee-a083-b026288862a5,"我在Doris中使用root和henghe用户去查询Hive数据时出现权限问题，即使已经创建了catalog并可以查看Hive中的数据库和表。这是怎么回事？
+",在fe/conf和be/conf目录下需要放置core-site.xml和hdfs-site.xml文件，然后在BE节点执行Kerberos的kinit命令并重启BE，之后再执行查询即可。需要按照官方文档的步骤进行操作。BE节点需要先进行kinit，这一步骤在官方文档中有说明。
+4c947149-c17a-11ee-9b5c-b026288862a5,我在使用Apache Doris时，建立了倒排索引，查询语句为select * from test where a=100，模型是unique key模型，开启了mergeonwrite属性，但不能创建物化视图和rollup，有什么解决办法吗？,你好，根据你的描述，mergeonwrite属性不支持物化视图，你可以考虑使用merge on read模式（mor），但需要注意的是，它只能改变列的顺序。如果你已经建立了表，想要改变列的顺序，可以考虑使用merge on read模式。merge on read是指读时合并，特别在unique模型上性能可能会比较差，这也是后来推出merge on write的原因。
+3ea05a97-c197-11ee-b39b-b026288862a5,"大佬们，doris中是否有array的聚合函数，能实现把一列array类型的数据聚合成一个大array,",",https://doris.apache.org/zh-CN/docs/dev/sql-manual/sql-functions/array-functions/array-concat，https://doris.apache.org/zh-CN/docs/dev/sql-manual/sql-functions/array-functions/array-union"
+9ef94b76-c178-11ee-9a18-b026288862a5,"大佬们queryprofile 里面的sql有没有办法定位到这个sql 从那个地址发过来的呢？,,",",看审计日志,[抱拳]感谢"
+162eafac-c18b-11ee-8018-b026288862a5,"Doris json类型，flink sql要定义什么类型，varchar数据写不进去,",",string类型可以"
+92ecd6ac-c17c-11ee-9a78-b026288862a5,"各位大神，求教一下：，mysql的数据使用datax导不进去，类型是text。Reason: column_name[Content], the length of input string is too long than vec schema. first 32 bytes of input str: [&lt;p style=""margin-left:0cm; ma] schema length: 2147483643; limit length: 1048576; actual length: 2057821; . src line []; 这个应该怎么做啊？,,",",string长度超限了，可以看看[Content]能否截断导入或者参考这个调整下limit：https://doris.apache.org/zh-CN/docs/sql-manual/sql-reference/Data-Types/STRING?_highlight=length&_highlight=string#description,好的，我看下"
+455e8789-c173-11ee-9204-b026288862a5,"2.0x 可以平滑的升级到2.1嘛？,",",可以"
+9ef89ff3-c178-11ee-a9a1-b026288862a5,"各位大佬，想问下文档里这2句话怎么理解，部署3个Follower后，是说Observer就是非必须的可以不用部署了？？？还是说至少也得部署一个,,,",",可以不用部署,不是必须项,好的，谢谢哈[抱拳]"
+3e94a2ae-c197-11ee-b3fc-b026288862a5,"@张家锋 老师 请问一下doris有没有字符串相似度对比的函数呀，类似比较""hello""和""hel"" 的相似度是多少,,好的 感谢",",没有，现在只有like,"
+9de43750-c17e-11ee-9ef2-b026288862a5,"什么是publish timeout？使用load Stream导入数据时遇到这个问题怎么办？
+",Publish timeout是指数据发布的超时时间，当使用load Stream导入数据时，如果数据发布超时，表明数据延迟可见，但数据一定会成功导入。可以通过查看磁盘IO负荷情况来排查延迟的原因。
+3e9094ee-c197-11ee-b24e-b026288862a5,"如何在Apache Doris中订阅Kafka并设置消息过滤参数？
+",可以通过设置max_error_num参数来过滤Kafka消息，该参数用于控制错误率。可以适当调高max_error_num参数来过滤消息。
+2fafcd86-c197-11ee-a52d-b026288862a5,"如何在Apache Doris中手动取消查询或者通过API调用取消查询？
+",可以使用KILL语句手动取消查询，具体语法和用法可以参考官方文档：https://doris.apache.org/docs/dev/sql-manual/sql-reference/Database-Administration-Statements/KILL?_highlight=kill。如果想通过Java代码取消查询，可以参考官方文档中的query-profile-action API：https://doris.apache.org/docs/dev/admin-manual/http-actions/fe/query-profile-action?_highlight=kill#cancel-query。
+088423d0-c18b-11ee-a89c-b026288862a5,我在使用Apache Doris的Flink Connector时遇到了错误，错误信息是[E-230]missed_versions is empty，该如何解决？,可能是由于Doris BE的内部错误导致的，可以尝试参照错误信息中提到的spec_version、max_version和tablet_id等参数，检查对应的Doris BE服务状态，或者尝试重新连接Doris BE服务。
+a017ef18-c187-11ee-a483-b026288862a5,"我想限制Apache Doris中BE进程的内存和每个查询的内存，但是设置exec_mem_limit似乎没有意义，因为峰值可以达到七十多G。有什么解决方法吗？
+",你可以选择将enable_query_memory_overcommit设置为false，但是这样有可能导致query内存不够用而被cancel。在1.2版本中，这个配置可能并不存在。
+4c913607-c17a-11ee-8683-b026288862a5,"doris routine load 任务导入kafka数据时，能否带上topic的offset？,",",可以带上"
+2fad8e6e-c197-11ee-ad7f-b026288862a5,"各位大佬，请问doris是否有函数可以把一个数组拆成多行的单值，比如 [1,2,3],拆成3行，每行分别是1,2,3,",",https://doris.apache.org/zh-CN/docs/1.2/sql-manual/sql-functions/table-functions/explode"
+2fa60a05-c197-11ee-9a4b-b026288862a5,"大佬们 doris 中使用 like 模糊查询 有什么优化建议吗,,",",Ngram bloomfilter,我现在用的1.2.7版本的"
+4c8e8cd9-c17a-11ee-bfed-b026288862a5,"我想让两套独立的doris集群中的部分表做实时同步，有什么方法吗？
+",可以使用CCR（Cross Cluster Replication）来实现两个独立的Doris集群中部分表的实时同步。
+d2637357-c174-11ee-b4c2-b026288862a5,"三个服务器可以部署一个集群吗，两台 FE 和 BE 混部？
+",测试的话可以这么部署，但是生产环境不建议。
+a439258a-c182-11ee-a93a-b026288862a5,"请问各位大佬，2.0.1/2.0.3启用了audit插件，发现scan_bytes, scan_rows, cpu_time_ms, peak_memory_bytes都是0，github上看到 https://github.com/apache/doris/pull/25435，但是2.0.3依旧是0,",",这个到205 会fix"
+212c65fb-c180-11ee-9df8-b026288862a5,"这个版本的 doris-2.0.3-rc06-37d31a5，老铁们，on update 报错呢,,呃，看文档里有了，试半天不行",",还不支持,"
+087c56b1-c18b-11ee-9f8a-b026288862a5,可以直接导入经过压缩的文本文件到Apache Doris吗？例如test.gz或者test.lz4？,Apache Doris的Broker Load支持导入parquet、orc、csv、gzip格式的文件，但不支持直接导入压缩文件，需要先解压缩后再进行导入。
+a4377f71-c182-11ee-b8f9-b026288862a5,"如何解决Apache Doris中一个异常的FE节点？
+",可以先备份正常FE的元数据，然后将异常FE重置：1、在FE master上执行drop命令剔除该异常FE；2、停止异常FE进程；3、清空异常FE的doris-meta元数据目录；4、重新启动进程并将异常FE重新加入FE集群。如果在生产环境无法清空异常FE的元数据目录，可以先备份再清空，让它从正常的master FE重新同步元数据，这不会影响数据。
+474b3bbc-c17a-11ee-9a8c-b026288862a5,在升级到2.0.3版本后，使用etl插入数据时报错，提示label重复，但是并没有指定label，该如何解决？,在Apache Doris中，数据导入是事务强一致的，由label确认唯一。可以通过指定hash等类型的label来避免重复。具体语法可以参考文档：[ WITH LABEL label]：https://cdnd.selectdb.com/zh-CN/docs/sql-manual/sql-reference/Data-Manipulation-Statements/Manipulation/INSERT
+13f66071-c197-11ee-880f-b026288862a5,"'enable_unique_key_merge_on_write'参数的具体作用和适用场景是什么？
+",开启该参数后，表将使用MOW（Merge on Write）模式，适合于高频小批次改写的场景，并且可以提升查询时的效率。与字段无关，不要求源表必须有时间字段。
+a4359219-c182-11ee-bfa4-b026288862a5,"doris建表时，datetime默认值不能使用now()吗,",",用这个current_timestamp"
+47496077-c17a-11ee-83b8-b026288862a5,"如何将旧的Doris集群中的数据导入到新的Doris集群中？
+",可以使用备份恢复功能进行数据迁移。
+a4350372-c182-11ee-8069-b026288862a5,"老师好，我的CPU不支持AVX2，我还需要重新编译源码吗,",",官方有编译好的noavx2版本"
+40e1c824-c173-11ee-981c-b026288862a5,"在使用Flink写入Doris时，遇到了错误Caused by: org.apache.doris.flink.exception.DorisRuntimeException: tabel {} stream load error: push_statistics.push_send_record_detail_v5, see more in [INTERNAL_ERROR]cancelled: [INTERNAL_ERROR]too many filtered rows，该如何解决？",你可以查看taskmanager日志，应该会有一个json格式的返回信息，里面包含一个ERROR_URL，打开查看即可找到解决方法。
+019e0075-c197-11ee-9948-b026288862a5,"在Apache Doris中，当使用streamload插入数据时，如果某条数据插入不成功，会返回错误吗？
+",是的，当使用streamload插入数据时，如果某条数据插入不成功，会返回错误。如果表字段类型与插入的数据类型不匹配，或者数据不符合严格模式的要求，会导致插入失败并返回错误信息。可以考虑使用严格模式来规范数据插入。
+474727de-c17a-11ee-be03-b026288862a5,"问一下，如果同一批数据，其中两条数据，有一个字段值不一样，其他都是一样的，那么streamload导入是 根据什么逻辑嘛？是按照哪个数据在后面，就去更新哪个字段？,,,",",官网搜索sequence列,看看 memtracker,好的"
+384daaac-c108-11ee-b90b-b026288862a5,"Doris升级后，为什么现在规定只能删除key列上的数据，以前可以删除任意字段条件的？
+",uniq和agg表只能删除key列上的数据，这是Doris的设计规定，不是升级导致的。
+384d4e80-c108-11ee-93cf-b026288862a5,"现在情况是HDD空间富余，SSD紧张，想把一部分数据移动到HDD上，是否可行,,",",这个你配置SSD 和 HDD的冷热分离了吗,这个应该是自动的啊，在动态分区表上，是有ttl的"
+fe0d2fe4-c18a-11ee-b400-b026288862a5,"Doris的week（p_day）函数是从0周开始的吗？
+
+",是的，Doris的week（p_day）函数是从0周开始计算的。
+9dfc2fba-c182-11ee-b8f0-b026288862a5,Flink同步mysql到doris中，mysql一次新增多个字段，doris的表只新增了第一个字段，有遇到这种情况吗？,配置--use-new-schema-change
+ac55bd75-c164-11ee-9678-b026288862a5,"doris现在支持 lateral view explode(col)的语法了吗？,,",",一直都支持,OK"
+d82bf613-c196-11ee-9476-b026288862a5,Doris能实现类似ClickHouse的Kafka Engine表实时消费Kafka主题中的数据并存储吗？ ,Doris可以通过routine load实现类似的功能，可以设置时间间隔进行实时加载，并支持微批处理。具体操作可参考文档：https://doris.apache.org/zh-CN/docs/1.2/data-operate/import/import-scenes/kafka-load
+d25de226-c174-11ee-b3c8-b026288862a5,"如何将Doris中的时间戳转换成日期？
+",可以使用from_unixtime函数来将时间戳转换成日期，具体用法可以参考官方文档中的说明：https://doris.apache.org/zh-CN/docs/sql-manual/sql-functions/date-time-functions/from-unixtime
+d8246372-c196-11ee-89a0-b026288862a5,我在Doris中定义了一个字段的类型为varchar(20)，但在使用datax导入数据时发现有的数值长度超过20，实际查看MySQL中的字段值长度也有超过20的情况。为什么Doris会出现这种情况，我应该如何设置Doris以解决这个问题？,Doris是按字节数来计算varchar字段的长度的。如果不想改变字段长度，可以考虑给字段设置更长的长度，或者将数据导入前进行处理，确保长度不超过20字节。另外，也可以考虑使用length*3来处理。目前Doris没有参数可以改变varchar字段按照字符长度计算的方式。
+269922a1-c108-11ee-8d9f-b026288862a5,使用insert into语句跑超时怎么办？ ,可以尝试使用insert into select语句，并按照分区来操作，分多次插入也是一种解决方案。
+2698985f-c108-11ee-8d29-b026288862a5,"各位大佬 doris表支持添加分区字段吗？,",",不支持，只能在建表是指定"
+995bc9ef-c178-11ee-b013-b026288862a5,"flink doris connector有计划支持flink1.18吗？,",",支持"
+9a8a3612-c187-11ee-b425-b026288862a5,和大家请教个问题，如何查询一个表中某条数据更新前与更新后的数据,",没有的，如果你要这么操作，只能用Duplicate 模型，它可以保存全部记录，但是不是唯一数据"
+ee796576-c18a-11ee-af67-b026288862a5,"我们公司打算再搭建一套大数据环境，是不是现在不需要搭hadoop了，只用部署doris就可以平替掉hadoop了？
+",Hadoop和Doris不同，Doris适用于实时需求，而离线需求通常使用Hive。根据数据量和需求，可以考虑存算分离架构，对于百TB内的数据量，Doris可以作为替代方案。
+d81ddd5d-c196-11ee-8f42-b026288862a5,"各位大佬，请问下agg模型运行后期发现DISTRIBUTED字段长度不够，怎么改长呢？，我执行alter table modify column报错：Can not modify distribution column,",",这个不能改了"
+ee787313-c18a-11ee-8f17-b026288862a5,请教一个问题：配置了一个FE，三个BE，其中一个BE挂了，就没法提供服务了，对不？,",3副本3be 挂一个可以读写高可用,"
+3ce8bdaa-c17a-11ee-aac7-b026288862a5,Doris能连金仓吗？ ,Doris目前不支持直接连接金仓，但可以通过ETL工具将金仓数据导入Doris中进行分析查询。
+47420ba9-c17a-11ee-a566-b026288862a5,"如何在Apache Doris中处理json array中的元素取值？
+",可以使用json_extract_string函数来获取json array中的元素值。如果需要对json进行复杂的处理，建议考虑使用Elasticsearch等工具。
+9a896835-c187-11ee-b598-b026288862a5,"消失的分区还能通过批量创建分区创建回来吗,",",,可以啊"
+cc2fc622-c196-11ee-b959-b026288862a5,"在使用FlinkCDC进行同步任务后，新增表和增量数据是否会同步？
+",任务开启后，源库新增表时，Doris不会同步新增表，但其他表的增量数据可以同步。建议根据官方文档进行校对和版本确认。
+ee75eda2-c18a-11ee-8db6-b026288862a5,"使用alter catalog修改密码之后，查询原来的catalog表会报UDF is library checksum is not match错误怎么办？
+",可以尝试使用refresh catalog命令或者switch catalog命令来解决该问题。同时，也可以检查Doris版本、be_custome.conf配置文件是否使用了倒排索引，以及句柄数的设置情况。
+c86f3161-c174-11ee-aa25-b026288862a5,brpc_num_threads参数和什么有关系？ ,brpc_num_threads参数与Doris的并行RPC调用线程数有关，调整该参数可以影响Doris的并发处理能力。
+8480bda6-c17c-11ee-85d3-b026288862a5,"请教一下，doris的查询可以像mysql那样忽略大小写吗？,",",可以"
+9a84954b-c187-11ee-a568-b026288862a5,"在创建动态分区表后，随着时间推移，之前最早的分区也不见了，有什么办法可以设置不自动删除之前分区吗？
+
+","可以通过alter table命令设置dynamic_partition.prop1属性来保留之前的分区。具体操作为：ALTER TABLE tbl1 SET (""dynamic_partition.prop1"" = ""value1"", ...);"
+e290fc17-c18a-11ee-a34e-b026288862a5,"Doris怎么依赖Flink做实时链路啊，有什么例子么？
+","用Flink Doris Connector CDC就行。有界流可以采用定时策略，做成微批。如果出现某个磁盘被打满的情况，可以考虑是否是因为CDC导致的。
+
+"
+32b8ff0f-c17a-11ee-9028-b026288862a5,"Doris是否支持搜索业务？ 
+",是的，Doris 2.0支持倒排全文检索。
+cc2619a8-c196-11ee-a885-b026288862a5,"Doris有地理函数吗？还有其他推荐的数据库吗？
+",Doris有地理函数，还在不断开发中。如果需要地理函数，可以使用UDF自行编写。关于其他数据库推荐，可以参考官方文档或咨询社区。
+c053253c-c196-11ee-91be-b026288862a5,我们现在这个机器的内存一直在上升，前两天1个多g，30天内涨了不到2G，这个正常吗？,从描述来看，内存上升的情况并不算太多，尤其是在一个月内不到2G的增长。而且曲线看起来也没有陡升的情况，而是起伏锯齿状的，这个情况比较正常。
+e28f6985-c18a-11ee-b6db-b026288862a5,如何设置Apache Doris的执行内存限制？,你可以通过修改be.conf文件来设置Apache Doris的执行内存限制。在be.conf文件中找到并修改exec_mem_limit参数即可。
+32b7172a-c17a-11ee-a7ee-b026288862a5,"如何在Apache Doris中进行部分列更新？
+","部分列更新需要确保表是唯一表，并且需要开启""enable_unique_key_merge_on_write""属性。同时，在建表语句中添加该属性即可。"
+958c0a14-c182-11ee-b9e1-b026288862a5,Doris支持从Doris写数据到Paimon或Hudi吗？ ,暂不支持。
+32b53924-c17a-11ee-adcd-b026288862a5,"开源版本的Doris可以用Doris Manager来部署和运维吗？
+",是的，可以使用Doris Manager来部署和运维开源版本的Doris。
+3cdffdd2-c17a-11ee-aec2-b026288862a5,Doris的fe目前只能支持jdk1.8吗？,是的，Doris的fe目前只支持jdk1.8。
+9e7115c8-c164-11ee-905c-b026288862a5,"我使用insert into select插入数据，提示成功了，但是表里边没有数据。 
+",检查是否开启了严格模式，flink-doris默认不是严格模式。
+8b9b8890-c187-11ee-bc15-b026288862a5,"如何修改动态分区表的bucket值？
+","可以通过修改动态分区属性，使用语句""dynamic_partition.buckets"" = ""32""来修改。"
+a545b24e-c196-11ee-b4b6-b026288862a5,"如何在mybatis程序中设置直接支持Apache Doris外表，实现联表查询而不需要连接多个数据源？
+",在mybatis程序中，不需要额外配置，可以直接使用Apache Doris外表进行联表查询。
+792c67e5-c17c-11ee-aff5-b026288862a5,"我在启动 Flink 同步任务时，遇到了报错 ""tablet 74794 has few replicas: 0, alive backends: []""，这是怎么回事？",这个错误通常是由于突然断电导致某个 tablet 所有副本损坏所致。你可以尝试在 be.conf 中加上 sync_tablet_meta = true 来避免突然断电导致数据丢失的问题，并手动修复损坏的 tablet 副本。如果删除 tablet 后仍然报错，可以参考 Apache Doris tablet 副本修复的原理、流程及问题定位进行排查。
+8ce39d4e-c196-11ee-8560-b026288862a5,"@张家锋 老师 请教一下seatunnel使用doris的sink器同步到doris用的8030 还是9030呢，seatunnel官网给的8030 但是运行时报错找不到可用后端（后端be运行正常），使用9030报错找不到可用的fe节点,,",",可以,8030"
+9589f9fc-c182-11ee-9afc-b026288862a5,请问一下对于datetime类型应该加什么索引加速查询呢？bitmap类型对于时间这种高基数不太合适，时间经常需要查询某段时间内，bloom索引对于非等值查询也效果不太好[皱眉],",基数多大、倒排可以试试,"
+7921cfd8-c17c-11ee-9b15-b026288862a5,"Routine load 获取不到kafka的分区信息报错了，可能原因是什么？
+",可能原因包括：1、BE与kafka网络是否通；2、kafka未提前设置自动创建topic，即topic不存在需要创建；3、配置了host但未正确配置；4、域名是否可以通。
+8cd2eb79-c196-11ee-bc25-b026288862a5,"在Apache Doris中，如何删除分区数据？
+",ALTER TABLE db.table，DROP PARTITION p1; 命令可以直接删除指定分区的数据。
+8ccfe8cc-c196-11ee-ad7d-b026288862a5,"如何使用正则表达式取出字符串中的特殊符号如$%@*？
+",可以使用正则表达式的`regexp_replace`函数，将特殊符号单独匹配并加上转义符号\进行匹配。特殊字符没有类似a-z这种通配符，需要单独匹配。详细用法可以参考官方文档：https://doris.apache.org/zh-CN/docs/sql-manual/sql-functions/string-functions/regexp/regexp-replace/#description
+9190b8ca-c178-11ee-accc-b026288862a5,"如何在Apache Doris中设置Flink CDC非严格模式？
+",在Apache Doris中设置Flink CDC非严格模式，可以直接添加参数 'strict_mode' = 'false'。同时，你也可以参考官方文档 https://doris.apache.org/zh-CN/docs/dev/ecosystem/flink-doris-connector/ 获取更多信息。
+8b92b4a6-c187-11ee-9654-b026288862a5,"通过jdbc进行数据写入时，如果be节点没有开通外网是否无法写入？
+",需要在同一个内网或者开通BE的8040端口。只开通一个端口也可以，但不建议使用JDBC写入，建议使用StreamLoad。
+9e6dc525-c164-11ee-b977-b026288862a5,"咨询一下streamLoad，返回结果""Status"": ""Success"",，但是经常会出现数据没写进去。这是为什么？,,",",可能得打开严格模式开看看了,估计是数据问题"
+bf979a5c-c174-11ee-bbfb-b026288862a5,"查询报这个错 可能是什么原因导致的  求大佬帮忙解答下  多谢，ERROR 1105 (HY000): errCode = 2, detailMessage = push plan fragment b665a425813c44f8-84208a55ce670223 to thread pool failed. err = Thread pool is at capacity (512/512 tasks running, 2048/2048 tasks queued), BE: 10.2.0.126,",",将你的brpc的线程数调大一下看看,,"
+61731992-c196-11ee-ac9c-b026288862a5,"各位大佬，flink-cdc 数据入doris，中间不需要kafka了么，不会出现背压么？,,",",不需要,直接入就行"
+8b8efe71-c187-11ee-ac45-b026288862a5,"Doris支持对于已经上线的集群，增加SSD硬盘的操作吗？
+",支持。修改配置后需要重启be服务。
+c0ac3cc4-c18a-11ee-b1bf-b026288862a5,"Doris是否支持数据的TTL功能，即到期数据自动删除？
+",是的，Doris支持表级别的分区实现TTL功能，可以通过动态分区和冷热分层来实现数据的自动删除。具体可以参考官方文档中的相关内容：https://doris.apache.org/zh-CN/docs/advanced/partition/dynamic-partition/ 和 冷热分层。
+c0a7d0be-c18a-11ee-a0a6-b026288862a5,"@张家锋 锋哥， 请问下， doris的colodatejoin ， 所有表的distribute字段都必须一致吗？,",",是的，，字段一样，分桶数量一样"
+8dd20004-c182-11ee-839e-b026288862a5,"打扰下各位大佬 ，请问Array什么时候可以支持ARRAY<Map<STRING, INT>>呢？ 现在用的2.0.3版本还不行,,,",",复杂类型嵌套 还不支持,array<string> 这种应该可以,复杂类型嵌套 得2.1版本了"
+23aa84cb-c17a-11ee-9456-b026288862a5,"在使用Apache Doris创建表时，使用select * from视图生成表报超长错误，如何解决？
+",在创建表时，需要指定字段的长度，如果视图中的字段类型是varchar，需要将长度乘以3来指定字段长度。因为Doris存储的是字节，而不是字符。
+791f1159-c17c-11ee-b76e-b026288862a5,"当我把 Flink Doris Connector 的 --single-sink 打开以后，再同步的时候就会报错，报错信息为""Caused by: java.lang.IllegalArgumentException: Can't find any matched tables, please check your configured database-name: [svc_dw] and table-name: [((svc_dw)\.(null))(?!(svc_dw\.(upload_histories,supported_schemas))$)]""，这是怎么回事？
+","当开启了 --single-sink 选项后，必须同时指定 --including-tables 参数，否则会出现无法匹配表的错误。目前这是必须设置的，后续可能会进行优化。
+"
+23a9acb9-c17a-11ee-a9b3-b026288862a5,"doris 支持滚动升级吗,,",",支持的,滚动升级不能回退"
+04717c5d-c180-11ee-bcd0-b026288862a5,"如何解决Apache Doris中关于存储策略的问题？
+",需要设置storage policy cooldown_ttl，并将其绑定到表上，这样数据才会根据存储策略定期刷到对象存储上。
+23a8d7a1-c17a-11ee-aa8d-b026288862a5,启用sequence column后，streamload导入：唯一健相等，设的时间列也相等时，后写的覆盖对吧,",覆盖,"
+4e7c628a-c196-11ee-83c4-b026288862a5,"大佬们 doris中创建的hive catalog，写sql是用hive的语法吗？,是做查询吗,对 etl查询,",doris的语法
+616e533a-c196-11ee-bf23-b026288862a5,"在Apache Doris中，创建了unique模型的表之后，还可以再增加unique列吗？怎么增加？
+",可以增加列，但不能增加key列。具体操作可以参考Apache Doris的ALTER TABLE COLUMN语法文档：https://doris.apache.org/zh-CN/docs/dev/sql-manual/sql-reference/Data-Definition-Statements/Alter/ALTER-TABLE-COLUMN
+4e6dbd06-c196-11ee-8927-b026288862a5,"目前支持pg库binlog同步吗,",",flink cdc"
+4e68fad5-c196-11ee-9138-b026288862a5,"在Apache Doris中，如何处理MySQL中的datetime类型，不保留精度？
+",在Apache Doris中，可以直接使用datetime类型，不需要设置精度，与MySQL中的处理方式相同。
+4e67851a-c196-11ee-9149-b026288862a5,"为啥我的时间后面多了6个0啊,这个应该怎么解决,,",",,设置精度,设置成毫秒就行"
+31ebc0b9-c196-11ee-bff8-b026288862a5,doris的数据会进行压缩吧？压缩比是多少呢？,",大概是4:1,"
+9e6c4e56-c164-11ee-bd73-b026288862a5,"doris支持把分区合并嘛,有些表是统一的按天写入的，但表特别小，按天分区特别多,",支持的，需要用到临时分区
+918b0efd-c178-11ee-bd7b-b026288862a5,删除Label 是需要等一段时间才能重新复用么? ,"是的，删除Label后需要等待一定时间才能重新复用，默认清理时间为72小时。
+
+**注意：**Label直接使用uuid，通常没有必要复用。"
+9658f987-c164-11ee-8885-b026288862a5,"在Apache Doris中，如果给某一列（比如应用id列）基数比较低的做索引，使用倒排索引快还是位图索引快，哪个好？ 
+",如果列的基数比较低，建议使用倒排索引。Doris内置了低基数优化，可以在前缀索引或分区分桶策略上做选择，但需要注意倒排索引并非万能，它是用于模糊匹配的，无法完全支持根据id进行精确查询。如果表是unique模型且需要使用用户id做更新，可以考虑使用位图索引。
+bad5f910-c18a-11ee-8f09-b026288862a5,"Doris单表最大支持多少TB？
+",Doris单表没有固定的大小限制，理论上可以支持很大的表，有用户已经使用了几十TB大小的单表。
+bad50545-c18a-11ee-ab0c-b026288862a5,请问倒排索引能对like ‘%abc%’这种查询加速吗？看文档没看到有这个示例,",没有  like 要用ngram bf,"
+918a0534-c178-11ee-a253-b026288862a5,"kafka routine load能解析嵌套json属性吗？,,",",可以的，类似这里有个表达式支持，json也用json解析函数解析出来就行。https://blog.csdn.net/wangleigiser/article/details/126492474?spm=1001.2014.3001.5502,收到，试了json函数确实可以"
+bac6b32f-c18a-11ee-8ebd-b026288862a5,请问物化视图对比直接做一个结果表，数据的存储会小一些吗,一样
+8dca1ea2-c182-11ee-843c-b026288862a5,"@SelectDB@王磊 问一些，高频，数据量很小，导致磁盘i/o  非常高，这是时候doris  能做什么优化,,这是代码端的优化，doris 服务端能做哪些优化？合并线程放大？还是怎么？,",",建议把批次放大一点,,可以搜下官网compaction优化"
+8838007a-c182-11ee-83e6-b026288862a5,"Doris有没有像ClickHouse Datetime64一样的类型或者有什么别的方法可以支持纳秒级别的Datetime呢？
+",可以改分桶数。可以使用datetime类型，并支持精度设置，如果需要纳秒级别的Datetime，可以考虑使用bigint类型。
+6da6a9bd-c17c-11ee-b5e6-b026288862a5,"在Apache Doris中，通过cdc标识__DORIS_DELETE_SIGN__的话，是写boolen值还是INT值？
+",在Apache Doris中，通过cdc标识__DORIS_DELETE_SIGN__时，应该写TINYINT值。
+bac5bdc8-c18a-11ee-b84e-b026288862a5,"doris支不支持脚本的执行，类似于  mysql -h node01 -P 9030 -uroot -proot.123 -f ""/test.sql'"" ?,",",支持"
+8836784f-c182-11ee-ab56-b026288862a5,"请问各位大佬 Doris现在可以像CK一样指定列级的压缩吗？,",",目前是表级设置压缩方式"
+26a33191-c196-11ee-87d3-b026288862a5,"doris 是可以做实时的查询吗,,",",就是干这个的啊,可以"
+14940d48-c196-11ee-a972-b026288862a5,"我在Apache Doris中使用stream load本地传csv时，如何正确关闭动态分区、手动建立分区并重新开启动态分区呢？
+","首先关闭动态分区，使用命令ALTER TABLE TEST4 SET (""Dynamic Partition.Enable""=""FALSE"")，然后手动建立分区，最后再开启动态分区即可。在此过程中，需要注意同步任务的关闭和重新开启。"
+8b89e83a-c187-11ee-9b80-b026288862a5,"有没有方法比较安全的导出几百个G的表格，不会显著增加内存和cpu的方法？
+",可以尝试使用Apache Doris的export命令，并分开导出数据，以避免对内存和CPU造成显著影响。另外，可以尝试关闭pipeline功能，如果版本支持的话，以减少对系统资源的占用。
+1483a228-c196-11ee-b69f-b026288862a5,Doris的动态分区的起始偏移量是由Doris自动维护的吗？如果我设置成月的-2，是不是到下个月，上上上个月的数据就没了？,动态分区的起始偏移量是可以手动设置的，如果设置成月的-2，表示保留最近两个月的数据，不会删除上上上个月的数据。如果需要保存所有数据并同步最新数据进去，可以不做定时删除，只需设置合适的动态分区起始偏移量即可。
+2df57ebe-c173-11ee-905d-b026288862a5,Doris对MySQL客户端版本有要求吗？ ,Doris对MySQL客户端版本有要求，高版本的MySQL客户端可能会在发送请求前多传一个命令，而Doris不支持这个特性。建议使用6.2版本的MySQL客户端。
+15536bd9-c17a-11ee-92b3-b026288862a5,我的数据写入到一定程度就再也写不进去了，有大佬遇到过吗？ ,可能是因为版本过高或者写入速度过快导致并发太高，Doris默认限制了tablet版本为500。
+8dc78e88-c182-11ee-be02-b026288862a5,"Doris里面有jsonb类型吗？
+",Doris 1.2.X版本引入了jsonb类型
+fae179b4-c195-11ee-9650-b026288862a5,"Apache Doris中使用Flink CDC自动同步数据时，会出现重复数据吗？
+",不会，确保搞好checkpoint（ckpt）即可。同时，需要了解Flink是什么，Flink CDC是什么，以及相关基础知识。
+802befd5-c187-11ee-a87d-b026288862a5,"Doris能不能查询历史执行的SQL记录呢？
+",可以通过审计日志功能实现，具体操作可参考官方文档：https://doris.apache.org/zh-CN/docs/ecosystem/audit-plugin
+cc9f4fb9-c195-11ee-a59b-b026288862a5,我启动be报错，fe没问题了，执行了sysctl -w vm.max_map_count=2000000，但还是没用，需要做配置文件吗？,"你可以尝试执行ulimit -n 65536，然后按照官方文档 https://doris.apache.org/zh-CN/docs/install/standard-deployment 的标准部署步骤来操作。这个句柄数设置对于服务启动很重要，很多应用因为这个设置太低而无法启动。
+"
+aa62e634-c18a-11ee-a0cf-b026288862a5,Apache Doris的版本1.2.5是否支持insert overwrite语法？,不支持，insert overwrite语法在2.0版本才开始支持。
+aa591d0c-c18a-11ee-8b7e-b026288862a5,"当我想要删除一个fe节点时，该如何操作？
+","首先停掉所有fe节点，然后启动你想要保留的那个fe节点，并让它成为master节点。接着再启动其他的fe节点，最后将不需要的fe节点进行drop操作。
+
+这里有一个需要注意的地方，当进行fe节点的删除操作时，剩余的fe节点数量必须是奇数个，因为选举master节点需要多数派选举，所以需要保证节点数量是奇数个。"
+fe6cfc87-c17f-11ee-b6f5-b026288862a5,有点奇怪[苦涩]，我这里遇到一个情况，flink cdc写入到doris的数据打上了删除标记，但是查询的时候不会默认加上 __DORIS_DELETE_SIGN__ != true,可能是因为hidden_column未关闭导致的，关闭hidden_column后会自动加上
+882f1ab3-c182-11ee-81b4-b026288862a5,"为什么使用Flink Streamload写入Doris时，即使数据量不大，也容易造成个别磁盘I/O打满，写入非常不均衡？
+","可能是因为分桶字段设置有问题。可以通过执行""ADMIN SHOW REPLICA DISTRIBUTION FROM tbl1;""来查看分桶情况，或者通过""show create table""来查看表设置了多少个桶。"
+05d9fcb5-c108-11ee-ae21-b026288862a5,"请问doris有类似mysql的慢日志吗？,",",审计日志插件"
+fade1aff-c195-11ee-bffa-b026288862a5,"请问下，routine load导入csv可以指定最后一列不要了吗，因为最后一列里面可能有逗号,",",直接k=""""可以吧"
+fe6b5b83-c17f-11ee-9774-b026288862a5,"我在使用flink cdc将MySQL数据写入doris时偶尔报错，fe进程没有退出，但是flink挂了，这是怎么回事？
+",可能是因为一次写入tablet的数据量过大导致2pc提交超时。可以检查代码逻辑是否及时提交commit，尝试切分任务减小一次操作的数据量，或者调整BE参数，将thrift_rpc_timeout_ms设置为较大值来延长超时时间。
+802501f9-c187-11ee-b58f-b026288862a5,"如何使用普通用户创建catalog，为什么提示没有权限？
+",普通用户创建catalog时，可能是因为MySQL账号权限不足。即使使用root账号可以创建，也可能是因为需要admin_priv权限。增删改查权限可能无法处理catalog，需要使用root账号创建好后，再赋值给普通用户。
+05d987aa-c108-11ee-ae0c-b026288862a5,"大佬们，问个问题  doris tablet副本同步过程中，未完成同步的副本对外可见吗,,谢谢哈，明白了,[表情]",",不会，如果该节点未完成副本均衡，这台节点不会对外服务,,"
+aa56e48d-c18a-11ee-8ddc-b026288862a5,"大佬们有没有遇到过相同的count sql执行多次之后统计的结果不一致，差的也不多，结果差1,,",",explain截图看下,应该是副本不一致设置use_fix_replica=1查询结果就一样了。"
+8c383626-c164-11ee-8ecb-b026288862a5,Doris是否支持类似MySQL的递归函数？ ,Doris目前不支持类似MySQL的递归函数。

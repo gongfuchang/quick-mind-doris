@@ -11,7 +11,8 @@ from zhipuai import ZhipuAI
 from src.logger import logger
 
 # EMBEDDING_MODEL_NAME = 'intfloat/e5-small-v2'
-EMBEDDING_MODEL_NAME = 'intfloat/multilingual-e5-small'
+EMBEDDING_MODEL_NAME = 'maidalun1020/bce-embedding-base_v1'
+# EMBEDDING_MODEL_NAME = 'intfloat/multilingual-e5-small'
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

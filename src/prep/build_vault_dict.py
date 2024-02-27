@@ -25,28 +25,66 @@ from src.logger import logger
 import re
 import base64
 from src.utils.file_util import get_file_path
+
 DATA_VAULT_DICT_PICKLE = get_file_path('data/vault_dict.pickle')
 DATA_DOC_DICT_PICKLE = get_file_path('data/doc_dict.pickle')
 
-def folder_chunks(content: str, max_chunk_lines=5, max_token_num=300) -> List[str]:
+
+def folder_chunks(content: str, max_chunk_lines=40, max_token_num=300) -> List[str]:
     """Folder up the text into chunks, where each new paragraph / top-level bullet in a new chunk.
 
     Args:
         lines: Lines in a document
 		chunks: Chunks to folder up
         max_chunk_lines: Maximum number of lines in a chunk before being discarded. Defaults to 5.
-        max_token_num: Maximum number of characters in a chunk before being discarded. Defaults to 300.
-
+        max_token_num: Maximum number of characters in a chunk before being discarded.  to 300.
+Defaults
     """
     # TODO 先按照一行一行的方式切分，后续再考虑按照段落切分
     if content is None:
         return []
     try:
-        chunks = [process_string(line.strip()) for line in content.split('\n')]
-        return [[item] for item in (filter(lambda x: filter_line_valid(x), chunks))] # [[1], [2]...]
+        lines = [process_string(line) for line in content.split('\n')]
+        chunks = []
+
+        # Process each line in the content to folder up the chunks
+        chunk_folder = []
+        line_index = 0
+
+        while line_index < len(lines):
+            line = lines[line_index]
+            line_index += 1
+            if len(line.strip()) == 0:
+                continue
+
+            chunk_folder.append(process_link_line(line))
+            print('single-append:', line)
+            if len(chunk_folder) >= max_chunk_lines or len(''.join(chunk_folder)) >= max_token_num:
+                chunks.append(chunk_folder)
+                logger.debug(f'chunk_index: {chunk_folder}')
+                chunk_folder = []
+
+        if len(chunk_folder) > 0:
+            logger.debug(f'chunk_index-last: {chunk_folder}')
+            if len(''.join(chunk_folder)) < 50 and len(chunks) > 0:
+                chunks[len(chunks) - 1].extend(chunk_folder)
+            else:
+                chunks.append(chunk_folder)
+        # TODO 测试 filter_line_valid 和不 filter_line_valid 两种效果
+        # return [[item] for item in (filter(lambda x: filter_line_valid(x), chunks))] # [[1], [2]...]
+        return chunks
     except Exception as e:
         logger.error(f'【skip】Error in foldering chunks: {e}')
         return []
+
+
+def process_link_line(line):
+    mt = re.match(r'\[(.+)\]\(([^\)]+)\)(.+)?\n', line)
+    if mt is None:
+        return line
+
+    gp = mt.groups()
+    return ' '.join(filter(lambda x: x is not None, [gp[0], gp[2]])) + '\n'
 
 
 def filter_line_valid(line: str) -> bool:
@@ -64,6 +102,7 @@ def filter_line_valid(line: str) -> bool:
     # 如果没有匹配到任何字符，返回False，否则返回True
     return match is not None
 
+
 def process_string(str: str):
     # Check if the string is a markdown IMG or Link
     if re.match(r'!\[.*\]\(.*\)|\[.*\]\(.*\)', str):
@@ -76,11 +115,14 @@ def process_string(str: str):
         return output_string
 
     return str
+
+
 def encode_doc_id(title_display: str, title: str, version: str) -> str:
     """Encode the doc id in the format of base32 code of <title_display>_<title>_<version>"""
     input_string = f"{title_display}_{title}_{version}" if version is not None else f"{title_display}_{title}"
     encoded_string = base64.b32encode(input_string.encode())
     return encoded_string.decode()
+
 
 def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
     """ Parse the helper doc in form of markdown to create a chunks of documents in form of json list like
@@ -126,7 +168,9 @@ def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
 
     with open(filename, 'r', encoding='utf-8', errors='replace') as f:
         # split the doc into chunks with a regex pattern
-        parts = re.split(r'---\s*\n*\s*\{\s*["\']title["\']\s*:\s*["\']([^"\']*)["\']\s*,\s*["\']language["\']\s*:\s*["\']([^"\']*)["\'](?:,\n\s*["\']toc_min_heading_level["\']: (\d+),\n\s*["\']toc_max_heading_level["\']: (\d+))?\s*\n*\s*\}\s*\n*\s*---\s*\n*\s*<!--split-->', f.read())
+        parts = re.split(
+            r'---\s*\n*\s*\{\s*["\']title["\']\s*:\s*["\']([^"\']*)["\']\s*,\s*["\']language["\']\s*:\s*["\']([^"\']*)["\'](?:,\n\s*["\']toc_min_heading_level["\']: (\d+),\n\s*["\']toc_max_heading_level["\']: (\d+))?\s*\n*\s*\}\s*\n*\s*---\s*\n*\s*<!--split-->',
+            f.read())
 
         # trim empty string in the parts
         parts = list(filter(lambda x: x != '', parts))
@@ -146,7 +190,6 @@ def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
             version = None
             deprecated = None
 
-
             # parse title display from content, which is in the format of '## title display' or '# title display'
             title_display_match = re.search(r'#{1,2} (.+)', content)
             title_display = title_display_match.group(1) if title_display_match is not None else None
@@ -155,8 +198,10 @@ def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
 
             # TODO 只针对于 function 处理 version 信息
             if content.startswith('##'):
-                version_match = re.search(r'<version(?:\s+[a-z]+=["\'][^"\']+["\'])? since=["\']([^"\']+)["\']', content)
-                deprecated_match = re.search(r'<version(?:\s+[a-z]+=["\'][^"\']+["\'])? deprecated=["\']([^"\']+)["\']', content)
+                version_match = re.search(r'<version(?:\s+[a-z]+=["\'][^"\']+["\'])? since=["\']([^"\']+)["\']',
+                                          content)
+                deprecated_match = re.search(r'<version(?:\s+[a-z]+=["\'][^"\']+["\'])? deprecated=["\']([^"\']+)["\']',
+                                             content)
                 if version_match:
                     version = version_match.group(1)
                 if deprecated_match:
@@ -166,7 +211,8 @@ def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
             # check the title_display is unique, otherwise log error and continue the loop
             if doc_id in doc_dict:
                 # logger.warn(f'Display title is not unique: {title_display}')
-                logger.error(f'【skip】Title and display title are both duplicated: {title} ==> {title_display} ==>{version}')
+                logger.error(
+                    f'【skip】Title and display title are both duplicated: {title} ==> {title_display} ==>{version}')
                 continue
 
             # print(version)
@@ -200,13 +246,16 @@ def create_vault_dict(filename: str) -> dict[str, dict[str, str]]:
             }
     return vault, doc_dict
 
+
 def get_vault_dict():
     with open(DATA_VAULT_DICT_PICKLE, 'rb') as f:
         return pickle.load(f)
 
+
 def get_doc_dict():
     with open(DATA_DOC_DICT_PICKLE, 'rb') as f:
         return pickle.load(f)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create vault dictionary')
@@ -225,5 +274,3 @@ if __name__ == '__main__':
     os.makedirs(os.path.dirname(DATA_DOC_DICT_PICKLE), exist_ok=True)
     with open(DATA_DOC_DICT_PICKLE, 'wb+') as f:
         pickle.dump(doc_dict, f, protocol=pickle.HIGHEST_PROTOCOL)
-
-

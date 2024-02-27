@@ -14,7 +14,6 @@ Say "information is missing on" followed by the related topic, if the given cont
 Other than code and specific names and citations, your answer must be written in the same language as the question.
 
 You should use chinese if the question contains chinese characters otherwise use english instead.
-如果问题中包含“是/否”或者“可以/不可以”，请回答“是”或者“可以”或者“不是”或者“不可以”，再给出解释。
 
 Here are the set of contexts:
 

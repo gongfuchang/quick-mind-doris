@@ -36,7 +36,7 @@ def request_torchv(query):
             # filter out keep-alive new lines and 'ping' messages
             if line:
                 decoded_line = line.decode('utf-8')
-                print(decoded_line)
+                # print(decoded_line)
 
                 if decoded_line.startswith('ping') or decoded_line.startswith('id:') or decoded_line.startswith('event:'):
                     continue
@@ -68,4 +68,4 @@ def request_torchv(query):
             "answer": "".join(answer),
         }
         print(result_json)
-        return result_json
+        return r, result_json

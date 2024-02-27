@@ -19,8 +19,10 @@ from pydantic import BaseModel
 from src.logger import logger
 # from src.prep.build_opensearch_index import (INDEX_NAME, get_opensearch,
 #                                              query_opensearch)
-from src.prep.build_semantic_index import query_semantic, get_embeddings_index, get_embeddings_array
-from src.prep.build_vault_dict import get_vault_dict
+from src.index.numpy_index_builder import NumpyIndexBuilder
+from src.index.pinecone_index_builder import PineconeIndexBuilder
+from src.index.es_index_builder import ElasticIndexBuilder
+from src.prep.build_vault_dict import get_vault_dict, get_doc_dict
 from src.utils.model_util import get_model_tuple, get_client
 from src.utils.type_util import to_bool
 from src.utils.prompt_util import get_more_questions_prompt, get_query_prompt
@@ -32,12 +34,12 @@ os_client = None
 #     os_client = get_opensearch('localhost')  # Change to 'localhost' if running locally
 # logger.info(f'OS client initialized: {os_client.info()}')
 
-# Load semantic index
-doc_embeddings_array = get_embeddings_array()
-embedding_index = get_embeddings_index()
+# Build and save embedding index and array
 tokenizer, model = get_model_tuple()
-
-logger.info(f'Semantic index loaded with {len(embedding_index)} documents')
+vault = get_vault_dict()
+doc = get_doc_dict()
+builder = ElasticIndexBuilder(vault, doc, tokenizer, model)
+embedding_index = builder.get_index_mapping()
 
 # If the user did not provide a query, we will use this default query.
 _default_query = "如何快速开启 Apache Doris 之旅?"
@@ -101,7 +103,7 @@ class RAG(uvicorn.Server):
         "llm_type": "GLM",  # default to GPT
         "config": {
             "search_engin": "",  # TODO support search engin
-            "model": "gpt-3.5-turbo",
+            "model": "gpt-4-0125-preview", #"gpt-3.5-turbo",
             # For all the search queries and results, we will use the KV store to
             # store them so that we can retrieve them later. Specify the name of the
             # KV here.
@@ -250,7 +252,7 @@ class RAG(uvicorn.Server):
 
         system_prompt = get_query_prompt(with_cite).format(
             context="\n\n".join(
-                [f"[[citation:{i + 1}]] {c['content']}" for i, c in enumerate(contexts)]
+                [(f"[[citation:{i + 1}]] {c['content']}" if with_cite else c['content']) for i, c in enumerate(contexts)]
             )
         )
         try:
@@ -300,8 +302,7 @@ class RAG(uvicorn.Server):
         # logger.debug(f'OS hits: {os_hits}')
 
         # Get hits from semantic index
-        semantic_response = query_semantic(query, tokenizer, model, doc_embeddings_array)
-        related_context = self._get_related_chunks_from_hits(semantic_response, embedding_index, self.vault)
+        related_context = builder.query_semantic(query)
         return related_context
 
     def _parse_os_response(self, response: dict) -> List[dict]:
@@ -350,59 +351,6 @@ class RAG(uvicorn.Server):
         num_tokens = len(encoding.encode(string))
         return num_tokens
 
-    def _get_related_chunks_from_hits(self, hits: List[dict], embedding_index: Dict[int, str], vault: dict,
-                                      max_lines: int = 10) -> List[dict]:
-        """
-        Deduplicates and scores a list of chunks. (There may be duplicate chunks as we query multiple indices.)
-
-        For each hit in semantic_hits, it starts from the current position of the hit in the embedding_index,
-        and looks up and down for the start or end of the related paragraph. The end is marked by the start of the next paragraph.
-        For example, if the hit is 1210 and the corresponding content is 'This is the paragraph text',
-        looking up is to find 1209, 1208 until 1205 '## This is the paragraph title'.
-        Looking down is to find 1211, 1212 until 1218 '## This is another paragraph title'.
-        If the results obtained from looking up and down exceed 10 lines, the search is exited in advance.
-
-        Args:
-            semantic_hits: List of hits from semantic index.
-            embedding_index: Mapping of document embedding row index to document doc-id.
-            vault: Dictionary of vault documents.
-            max_lines: Maximum lines to allow in chunks. Defaults to 10.
-
-        Returns:
-            List of chunks for retrieval-augmented generation, in form of [{
-                content: ''
-                title: ''
-            }].
-        """
-        chunks = []
-        for hit_index in hits:
-            chunk_id = embedding_index[hit_index]
-            up_index = hit_index - 1
-            down_index = hit_index + 1
-            lines = 0
-            chunk = {'title': vault[chunk_id]['title'], 'content': ''.join(vault[chunk_id]['chunks'])}
-            content_list = [chunk['content']]
-            # Look up
-            while up_index in embedding_index and lines < max_lines:
-                chunk_id = embedding_index[up_index]
-                chunk_content = ' '.join(vault[chunk_id]['chunks'])
-                if re.match(r'^#+ ', chunk_content):  # Paragraph start
-                    break
-                content_list.insert(0, chunk_content)
-                lines += 1
-                up_index -= 1
-            # Look down
-            while down_index in embedding_index and lines < max_lines:
-                chunk_id = embedding_index[down_index]
-                chunk_content = ' '.join(vault[chunk_id]['chunks'])
-                if re.match(r'^#+ ', chunk_content):  # Paragraph start
-                    break
-                content_list.append(chunk_content)
-                lines += 1
-                down_index += 1
-            chunk['content'] = '\n'.join(content_list)
-            chunks.append(chunk)
-        return chunks
 
 import argparse
 
