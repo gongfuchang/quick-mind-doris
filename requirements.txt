@@ -11,3 +11,5 @@ torch==2.0.1
 transformers==4.29.2
 uvicorn[stardard]==0.22.0
 elasticsearch==8.12.0
+lac==2.1.2
+paddlepaddle==2.5.2
